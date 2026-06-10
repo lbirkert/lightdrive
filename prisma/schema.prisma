@@ -1,0 +1,70 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/lib/server/prisma-client"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id           String    @id @default(cuid())
+  name         String
+  email        String    @unique
+  passwordHash String
+  createdAt    DateTime  @default(now())
+  files        File[]
+  folders      Folder[]
+  sessions     Session[]
+}
+
+model Session {
+  token    String   @id
+  userId   String
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime?
+  createdAt DateTime @default(now())
+}
+
+model Folder {
+  id        String   @id @default(cuid())
+  name      String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parentId  String?
+  parent    Folder?  @relation("FolderRelation", fields: [parentId], references: [id], onDelete: Cascade)
+  children  Folder[] @relation("FolderRelation")
+  files     File[]
+  shares    Share[]
+  createdAt DateTime @default(now())
+}
+
+model File {
+  id           String   @id @default(cuid())
+  storedName   String
+  originalName String
+  contentHash  String?
+  size         Int
+  type         String   @default("application/octet-stream")
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  folderId     String?
+  folder       Folder?  @relation(fields: [folderId], references: [id], onDelete: SetNull)
+  downloads      Int      @default(0)
+  hasPreview     Boolean  @default(false)
+  uploadedAt     DateTime @default(now())
+  transcodedName String?
+  shares       Share[]
+}
+
+model Share {
+  id          String   @id @default(cuid())
+  fileId      String?
+  file        File?    @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  folderId    String?
+  folder      Folder?  @relation(fields: [folderId], references: [id], onDelete: Cascade)
+  token       String   @unique @default(cuid())
+  permissions String   @default("read")
+  expiresAt   DateTime?
+  createdAt   DateTime @default(now())
+}

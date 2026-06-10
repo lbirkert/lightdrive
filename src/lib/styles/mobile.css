@@ -1,0 +1,101 @@
+@media (max-width: 768px) {
+
+  /* Remove button labels */
+  .m-hide {
+    display: none !important;
+  }
+
+  .m-show {
+    display: block !important;
+  }
+
+  .list-table {
+    margin: 0 !important;
+    border: none !important;
+    border-radius: 0 !important;
+  }
+
+  .list-header {
+    display: none !important;
+  }
+
+  .list-row {
+    display: flex !important;
+    padding: var(--flew-spacing-3) var(--flew-spacing-4) !important;
+  }
+
+  .list-thumb,
+  .list-thumb-placeholder {
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: var(--flew-spacing-2) !important;
+  }
+
+  .col-name {
+    gap: var(--flew-spacing-4) !important;
+  }
+
+  .col-name div {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+
+  }
+
+  .name-text {
+    font-size: var(--flew-font-size-base) !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .name-size {
+    font-size: var(--flew-font-size-base) !important;
+    opacity: 0.8;
+  }
+
+  .list-row .col-size,
+  .list-row .col-date,
+  .list-row .col-owner {
+    display: none;
+  }
+
+  .preview-toolbar {
+    align-items: start !important;
+    flex-direction: column;
+  }
+
+  .preview-toolbar-name {
+    font-size: var(--flew-font-size-base) !important;
+  }
+
+  .preview-toolbar .toolbar-spacer {
+    display: none;
+  }
+
+  .current-folder {
+    font-size: var(--flew-font-size-lg) !important;
+  }
+
+  .toolbar {
+    padding-bottom: var(--flew-spacing-4) !important;
+  }
+
+  .toolbar .btn-ghost svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .app-header {
+    padding: var(--flew-spacing-4) !important;
+  }
+
+  .logo {
+    font-size: var(--flew-font-size-xl) !important;
+  }
+
+  .logo svg {
+    width: 30px;
+    height: 30px;
+  }
+}

@@ -1,0 +1,10 @@
+.svelte-kit/
+node_modules/
+uploads/
+dev.db
+dev.db-journal
+.env
+prisma/dev.db
+prisma/dev.db-journal
+build/
+src/lib/server/prisma-client
