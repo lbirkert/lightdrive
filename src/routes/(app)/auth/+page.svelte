@@ -54,7 +54,7 @@
       body: JSON.stringify({ email: lEmail, password: lPassword }),
     });
     loading = false;
-    if (res.ok) goto("/ui-rewrite/drive");
+    if (res.ok) goto("/drive");
     else { const r = await res.json(); serverError = r.error || "Something went wrong"; }
   }
 
@@ -71,7 +71,7 @@
       body: JSON.stringify({ name: sName, email: sEmail, password: sPassword }),
     });
     loading = false;
-    if (res.ok) goto("/ui-rewrite/drive");
+    if (res.ok) goto("/drive");
     else { const r = await res.json(); serverError = r.error || "Something went wrong"; }
   }
 

@@ -3,8 +3,8 @@ import type { PageServerLoad } from "./$types";
 
 export const load: PageServerLoad = async ({ locals }) => {
   if (locals.user) {
-    redirect(302, `/ui-rewrite/drive/${locals.user.id}`);
+    redirect(302, `/drive/${locals.user.id}`);
   } else {
-    redirect(302, "/ui-rewrite/auth");
+    redirect(302, "/auth");
   }
 };

@@ -23,7 +23,7 @@
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name }),
     });
-    if (res.ok) { messageType = "success"; message = "Profile updated"; goto("/ui-rewrite/account"); }
+    if (res.ok) { messageType = "success"; message = "Profile updated"; goto("/account"); }
     else { const r = await res.json(); messageType = "error"; message = r.error || "Failed to update"; }
     saving = false;
   }
@@ -83,7 +83,7 @@
   <div class="card">
     <h3>Share Links</h3>
     <p class="secondary">Manage all your active share links across files and folders.</p>
-    <a href="/ui-rewrite/account/shares" class="btn-primary">Manage Share Links</a>
+    <a href="/account/shares" class="btn-primary">Manage Share Links</a>
   </div>
 </div>
 

@@ -82,7 +82,7 @@
   {#if !store.isShared && !store.data.user}
     <div class="unauthorized">
       <p>Sign in to access your drive.</p>
-      <a href="/ui-rewrite/auth" class="btn-primary">Sign In</a>
+      <a href="/auth" class="btn-primary">Sign In</a>
     </div>
   {:else}
     {#if store.filePreviewId}

@@ -4,9 +4,9 @@
     formatFullDate,
     getPreviewUrl,
     isVideoType,
-  } from "./helpers";
+  } from "../helpers";
   import { Folder, FileText } from "@lucide/svelte";
-../helpers
+
   let failedImages = $state<Set<string>>(new Set());
   function imgError(fileId: string) {
     failedImages.add(fileId);

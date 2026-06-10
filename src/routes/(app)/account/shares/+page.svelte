@@ -15,7 +15,7 @@
 
   let copiedToken = $state<string | null>(null);
 
-  function shareUrl(token: string) { return `${location.origin}/ui-rewrite/drive/${token}`; }
+  function shareUrl(token: string) { return `${location.origin}/drive/${token}`; }
 
   async function copyLink(token: string) {
     try { await navigator.clipboard.writeText(shareUrl(token)); copiedToken = token; setTimeout(() => copiedToken = null, 2000); }
@@ -61,12 +61,12 @@
 <div class="page page:sm shares-page">
   <h1>Share Links</h1>
 
-  <a href="/ui-rewrite/account" class="back-link">&larr; Back to Account</a>
+  <a href="/account" class="back-link">&larr; Back to Account</a>
 
   {#if shares.length === 0}
     <div class="card empty-state">
       <p class="secondary">No share links yet. Go to your Drive to share files and folders.</p>
-      <a href="/ui-rewrite/drive" class="btn-primary">Go to Drive</a>
+      <a href="/drive" class="btn-primary">Go to Drive</a>
     </div>
   {:else}
     <ul class="share-list">

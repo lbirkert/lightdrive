@@ -18,12 +18,12 @@
 
   async function logout() {
     await fetch("/api/auth/logout", { method: "POST" });
-    goto("/ui-rewrite/auth");
+    goto("/auth");
   }
 
   const links = [
-    { href: "/ui-rewrite/drive", label: "Drive", icon: Folder },
-    { href: "/ui-rewrite/dashboard", label: "Dashboard", icon: BarChart3 },
+    { href: "/drive", label: "Drive", icon: Folder },
+    { href: "/dashboard", label: "Dashboard", icon: BarChart3 },
   ];
 
   $effect(() => {
@@ -49,7 +49,7 @@
 <input type="checkbox" id="mobile-menu-toggle" class="mobile-menu-checkbox" />
 <div class="app-shell">
   <header class="app-header">
-    <a href="/ui-rewrite/drive" class="logo"><HardDrive size={18} /> LightDrive</a>
+    <a href="/drive" class="logo"><HardDrive size={18} /> LightDrive</a>
 
     <nav class="desktop-nav">
       <ul>
@@ -80,9 +80,9 @@
           {#if userMenuOpen}
             <nav class="user-dropdown">
               <ul>
-                <li><a href="/ui-rewrite/account" class="nav-link" onclick={() => userMenuOpen = false}><User size={14} /> Account</a></li>
-                <li><a href="/ui-rewrite/account/preferences" class="nav-link" onclick={() => userMenuOpen = false}><Settings size={14} /> Preferences</a></li>
-                <li><a href="/ui-rewrite/account/shares" class="nav-link" onclick={() => userMenuOpen = false}><Link size={14} /> Share Links</a></li>
+                <li><a href="/account" class="nav-link" onclick={() => userMenuOpen = false}><User size={14} /> Account</a></li>
+                <li><a href="/account/preferences" class="nav-link" onclick={() => userMenuOpen = false}><Settings size={14} /> Preferences</a></li>
+                <li><a href="/account/shares" class="nav-link" onclick={() => userMenuOpen = false}><Link size={14} /> Share Links</a></li>
                 <li>
                   <button class="nav-link" onclick={() => { userMenuOpen = false; logout(); }}><LogOut size={14} /> Sign Out</button>
                 </li>
@@ -91,7 +91,7 @@
           {/if}
         </div>
       {:else}
-        <a href="/ui-rewrite/auth" class="sign-in-link"><LogIn size={14} /> Sign In</a>
+        <a href="/auth" class="sign-in-link"><LogIn size={14} /> Sign In</a>
       {/if}
     </div>
 
@@ -122,9 +122,9 @@
             </div>
           </div>
           <ul>
-            <li><a href="/ui-rewrite/account" class="nav-link" onclick={() => { const cb = document.getElementById('mobile-menu-toggle') as HTMLInputElement; if (cb) cb.checked = false; }}><User size={18} /> Account</a></li>
-            <li><a href="/ui-rewrite/account/preferences" class="nav-link" onclick={() => { const cb = document.getElementById('mobile-menu-toggle') as HTMLInputElement; if (cb) cb.checked = false; }}><Settings size={18} /> Preferences</a></li>
-            <li><a href="/ui-rewrite/account/shares" class="nav-link" onclick={() => { const cb = document.getElementById('mobile-menu-toggle') as HTMLInputElement; if (cb) cb.checked = false; }}><Link size={18} /> Share Links</a></li>
+            <li><a href="/account" class="nav-link" onclick={() => { const cb = document.getElementById('mobile-menu-toggle') as HTMLInputElement; if (cb) cb.checked = false; }}><User size={18} /> Account</a></li>
+            <li><a href="/account/preferences" class="nav-link" onclick={() => { const cb = document.getElementById('mobile-menu-toggle') as HTMLInputElement; if (cb) cb.checked = false; }}><Settings size={18} /> Preferences</a></li>
+            <li><a href="/account/shares" class="nav-link" onclick={() => { const cb = document.getElementById('mobile-menu-toggle') as HTMLInputElement; if (cb) cb.checked = false; }}><Link size={18} /> Share Links</a></li>
             <li>
               <button class="nav-link" onclick={() => { const cb = document.getElementById('mobile-menu-toggle') as HTMLInputElement; if (cb) cb.checked = false; logout(); }}><LogOut size={18} /> Sign Out</button>
             </li>
@@ -132,7 +132,7 @@
         {:else}
           <hr />
           <ul>
-            <li><a href="/ui-rewrite/auth" class="nav-link" onclick={() => { const cb = document.getElementById('mobile-menu-toggle') as HTMLInputElement; if (cb) cb.checked = false; }}><LogIn size={18} /> Sign In</a></li>
+            <li><a href="/auth" class="nav-link" onclick={() => { const cb = document.getElementById('mobile-menu-toggle') as HTMLInputElement; if (cb) cb.checked = false; }}><LogIn size={18} /> Sign In</a></li>
           </ul>
         {/if}
       </nav>

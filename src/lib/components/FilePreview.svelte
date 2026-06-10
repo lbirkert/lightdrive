@@ -1,10 +1,10 @@
 <script lang="ts">
-  import { formatSize, formatFullDate, getPreviewUrl } from "./helpers";
+  import { formatSize, formatFullDate, getPreviewUrl } from "../helpers";
 
   type Props = {
     driveId: string;
     filePreviewId: string | null;
-    previewFile: any;../helpers
+    previewFile: any;
     previewCategory: string | null;
     previewContent: any;
     previewLoading: boolean;

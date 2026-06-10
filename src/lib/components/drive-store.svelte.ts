@@ -212,7 +212,7 @@ export class DriveStore {
 
   navigateTo = (folderId: string | null) => {
     this.clearSelection();
-    const base = `/ui-rewrite/drive/${this.driveId}`;
+    const base = `/drive/${this.driveId}`;
     this.kit.goto(folderId ? `${base}?folder=${folderId}` : base);
   };
 
@@ -225,7 +225,7 @@ export class DriveStore {
     params.set("file", fileId);
     params.set("scroll", String(scrollTop));
     const hash = this.viewMode === "grid" ? "#grid" : "#list";
-    this.kit.goto(`/ui-rewrite/drive/${this.driveId}?${params}${hash}`);
+    this.kit.goto(`/drive/${this.driveId}?${params}${hash}`);
   };
 
   closeFilePreview = () => {
@@ -238,7 +238,7 @@ export class DriveStore {
       if (folder) params.set("folder", folder);
       if (scroll) params.set("scroll", scroll);
       const qs = params.toString();
-      this.kit.goto(qs ? `/ui-rewrite/drive/${this.driveId}?${qs}${hash}` : `/ui-rewrite/drive/${this.driveId}${hash}`);
+      this.kit.goto(qs ? `/drive/${this.driveId}?${qs}${hash}` : `/drive/${this.driveId}${hash}`);
     })
   };
 
@@ -459,7 +459,7 @@ export class DriveStore {
     });
     if (res.ok) {
       const r = await res.json();
-      this.shareUrlValue = `${location.origin}/ui-rewrite/drive/${r.share.token}`;
+      this.shareUrlValue = `${location.origin}/drive/${r.share.token}`;
       await this.loadShares();
     } else {
       const r = await res.json();
@@ -478,7 +478,7 @@ export class DriveStore {
   };
 
   copyShareUrl = async (token: string) => {
-    const url = `${location.origin}/ui-rewrite/drive/${token}`;
+    const url = `${location.origin}/drive/${token}`;
     try {
       await navigator.clipboard.writeText(url);
       this.copiedToken = token;

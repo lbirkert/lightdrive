@@ -1,6 +1,5 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { Spinner, Flex, Text } from "flewui";
 
   let loading = $state(true);
   let error = $state("");
@@ -10,10 +9,8 @@
       const el = document.getElementById("scalar-container");
       if (!el) throw new Error("Container not found");
 
-      // Load Scalar script - auto-init is a no-op without #api-reference element
       await loadScalarScript();
 
-      // Mount Scalar on our container
       el.innerHTML = "";
       loading = false;
       (window as any).Scalar.createApiReference(el, { url: "/api-docs/spec.json" });
@@ -44,25 +41,16 @@
   <title>LightDrive API</title>
 </svelte:head>
 
-<div id="scalar-container" style="flex: 1; width: 100%;">
+<div id="scalar-container">
   {#if loading && !error}
-    <Flex direction="vertical" align="center" justify="center" style="height: 100%;" gap="var(--flew-spacing-3)">
-      <Spinner />
-      <Text color="secondary">Loading API documentation...</Text>
-    </Flex>
+    <div class="api-docs-status">
+      <div class="spinner"></div>
+      <p class="text-secondary">Loading API documentation...</p>
+    </div>
   {:else if error}
-    <Flex direction="vertical" align="center" justify="center" style="height: 100%;" gap="var(--flew-spacing-3)">
-      <Text color="error">{error}</Text>
-      <Text color="secondary" size="sm">Try refreshing the page or check your internet connection.</Text>
-    </Flex>
+    <div class="api-docs-status">
+      <p class="text-error">{error}</p>
+      <p class="text-secondary text-sm">Try refreshing the page or check your internet connection.</p>
+    </div>
   {/if}
 </div>
-
-
-<style>
-  #scalar-container {
-    --scalar-header-height: 54px;
-    height: 100vh;
-    overflow-y: scroll;
-  }
-</style>

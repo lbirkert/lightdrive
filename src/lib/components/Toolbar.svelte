@@ -93,12 +93,12 @@
       <nav class="breadcrumb-desktop">
         {#each breadcrumbs as crumb, i}
           {#if i > 0}<span class="breadcrumb-sep">/</span>{/if}
-          <a class="btn-ghost truncate breadcrumb-btn" href="/ui-rewrite/drive/{crumb.id || ''}" onclick={(e) => { e.preventDefault(); onnavigate?.(crumb.id); }}>{crumb.name}</a>
+          <a class="btn-ghost truncate breadcrumb-btn" href="/drive/{crumb.id || ''}" onclick={(e) => { e.preventDefault(); onnavigate?.(crumb.id); }}>{crumb.name}</a>
         {/each}
       </nav>
       <nav class="breadcrumb-mobile">
         {#if breadcrumbs.length > 1}
-          <a class="back-btn" href="/ui-rewrite/drive/{breadcrumbs[breadcrumbs.length - 2]?.id || ''}" onclick={(e) => { e.preventDefault(); onnavigate?.(breadcrumbs[breadcrumbs.length - 2]?.id); }} aria-label="Back">&larr;</a>
+          <a class="back-btn" href="/drive/{breadcrumbs[breadcrumbs.length - 2]?.id || ''}" onclick={(e) => { e.preventDefault(); onnavigate?.(breadcrumbs[breadcrumbs.length - 2]?.id); }} aria-label="Back">&larr;</a>
         {/if}
         <span class="current-folder">{breadcrumbs[breadcrumbs.length - 1]?.name ?? ""}</span>
       </nav>
