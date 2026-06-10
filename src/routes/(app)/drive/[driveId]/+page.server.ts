@@ -1,4 +1,4 @@
-import { getRootFolders, getSubFolders, getFolder, getFiles, getFolderTreeSizes, getShare } from "$lib/server/db";
+import { getRootFolders, getSubFolders, getFolder, getFiles, getFolderTreeSizes, getShare, getAcceptedDrives } from "$lib/server/db";
 import prisma from "$lib/server/prisma";
 import { error } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
@@ -7,6 +7,20 @@ export const load: PageServerLoad = async ({ locals, depends, url, params }) => 
   depends("app:drive");
   const user = locals.user ?? null;
   const driveId = params.driveId;
+
+  let acceptedDrives: { id: string; name: string; token: string }[] = [];
+  if (user) {
+    const accepted = await getAcceptedDrives(user.id);
+    acceptedDrives = accepted
+      .filter(a => a.share)
+      .map(a => {
+        const share = a.share!;
+        const name = share.folderId && share.folder
+          ? share.folder.name
+          : `${a.fromUser.name}'s Drive`;
+        return { id: a.id, name, token: share.token };
+      });
+  }
 
   if (user && driveId === user.id) {
     const folderId = url.searchParams.get("folder") || null;
@@ -27,7 +41,7 @@ export const load: PageServerLoad = async ({ locals, depends, url, params }) => 
       breadcrumbs.push(...chain);
     }
 
-    return { user, driveId, folders, files, breadcrumbs, folderSizes, isShared: false };
+    return { user, driveId, folders, files, breadcrumbs, folderSizes, isShared: false, acceptedDrives };
   }
 
   const share = await getShare(driveId);
@@ -46,6 +60,7 @@ export const load: PageServerLoad = async ({ locals, depends, url, params }) => 
       sharedFiles: [],
       sharedFolders: [],
       shareBreadcrumbs: [],
+      acceptedDrives,
     };
   }
 
@@ -78,6 +93,7 @@ export const load: PageServerLoad = async ({ locals, depends, url, params }) => 
       sharedFiles: files,
       sharedFolders: folders,
       shareBreadcrumbs: breadcrumbs,
+      acceptedDrives,
     };
   }
 
@@ -111,6 +127,7 @@ export const load: PageServerLoad = async ({ locals, depends, url, params }) => 
       sharedFiles: files,
       sharedFolders: folders,
       shareBreadcrumbs: breadcrumbs,
+      acceptedDrives,
     };
   }
 

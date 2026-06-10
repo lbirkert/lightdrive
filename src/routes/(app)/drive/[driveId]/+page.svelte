@@ -104,19 +104,6 @@
         </div>
         <span class="toolbar-spacer"></span>
         <div class="preview-toolbar-actions">
-          <button
-            class="preview-btn"
-            disabled={store.previewFileIndex <= 0}
-            onclick={store.goToPrevFile}
-            aria-label="Previous"><ChevronLeft size={16} /></button
-          >
-          <button
-            class="preview-btn"
-            disabled={store.previewFileIndex < 0 ||
-              store.previewFileIndex >= store.previewFiles.length - 1}
-            onclick={store.goToNextFile}
-            aria-label="Next"><ChevronRight size={16} /></button
-          >
           {#if store.editMode}
             <button class="preview-btn" onclick={store.saveEdit}>Save</button>
             <button class="preview-btn" onclick={store.cancelEdit}
@@ -156,6 +143,19 @@
               ><Trash2 size={14} /> <span class="m-hide">Delete</span></button
             >
           {/if}
+          <button
+            class="preview-btn"
+            disabled={store.previewFileIndex <= 0}
+            onclick={store.goToPrevFile}
+            aria-label="Previous"><ChevronLeft size={16} /></button
+          >
+          <button
+            class="preview-btn"
+            disabled={store.previewFileIndex < 0 ||
+              store.previewFileIndex >= store.previewFiles.length - 1}
+            onclick={store.goToNextFile}
+            aria-label="Next"><ChevronRight size={16} /></button
+          >
         </div>
       </div>
     {:else}
@@ -193,6 +193,8 @@
         onsearchclear={() => (store.searchQuery = "")}
         onfilterchange={(v) => (store.filterType = v)}
         onsortchange={(v) => (store.sortMode = v as any)}
+        acceptedDrives={store.acceptedDrives}
+        driveId={store.driveId}
       />
     {/if}
 
@@ -417,7 +419,7 @@
 {/if}
 
 <!-- Move Dialog -->
-{#if !store.isShared && store.moveDialogOpen}
+{#if store.moveDialogOpen}
   <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
   <div
     class="modal-overlay"

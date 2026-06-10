@@ -482,3 +482,118 @@ export async function updateShare(id: string, data: { permissions?: string; expi
     include: { file: true, folder: true },
   });
 }
+
+// ---- Share Invitations ----
+
+export async function createShareInvitation(options: {
+  fromUserId: string;
+  toUserId: string;
+  folderId?: string;
+  folderName?: string;
+  permissions?: string;
+}) {
+  const existing = await prisma.shareInvitation.findFirst({
+    where: { fromUserId: options.fromUserId, toUserId: options.toUserId, status: "pending" },
+  });
+  if (existing) return existing;
+  return prisma.shareInvitation.create({
+    data: {
+      fromUserId: options.fromUserId,
+      toUserId: options.toUserId,
+      folderId: options.folderId ?? null,
+      folderName: options.folderName ?? null,
+      permissions: options.permissions ?? "view",
+    },
+    include: { fromUser: { select: { id: true, name: true } }, toUser: { select: { id: true, name: true } }, share: true },
+  });
+}
+
+export async function getShareInvitationsForUser(userId: string) {
+  return prisma.shareInvitation.findMany({
+    where: { toUserId: userId, status: "pending" },
+    include: { fromUser: { select: { id: true, name: true } }, share: true },
+    orderBy: { createdAt: "desc" },
+  });
+}
+
+export async function getSentInvitations(userId: string) {
+  return prisma.shareInvitation.findMany({
+    where: { fromUserId: userId },
+    include: { toUser: { select: { id: true, name: true } }, share: true },
+    orderBy: { createdAt: "desc" },
+  });
+}
+
+export async function getShareInvitation(id: string) {
+  return prisma.shareInvitation.findUnique({
+    where: { id },
+    include: { fromUser: { select: { id: true, name: true } }, share: true },
+  });
+}
+
+export async function acceptShareInvitation(id: string) {
+  const invitation = await prisma.shareInvitation.findUnique({ where: { id } });
+  if (!invitation || invitation.status !== "pending") return null;
+
+  const share = await prisma.share.create({
+    data: {
+      userId: invitation.fromUserId,
+      folderId: invitation.folderId,
+      permissions: invitation.permissions,
+    },
+  });
+
+  await prisma.shareInvitation.update({
+    where: { id },
+    data: { status: "accepted", shareId: share.id, respondedAt: new Date() },
+  });
+
+  return { invitation: await getShareInvitation(id), share };
+}
+
+export async function declineShareInvitation(id: string) {
+  const invitation = await prisma.shareInvitation.findUnique({ where: { id } });
+  if (!invitation || invitation.status !== "pending") return null;
+
+  await prisma.shareInvitation.update({
+    where: { id },
+    data: { status: "declined", respondedAt: new Date() },
+  });
+
+  return getShareInvitation(id);
+}
+
+export async function getAcceptedDrives(userId: string) {
+  const accepted = await prisma.shareInvitation.findMany({
+    where: { toUserId: userId, status: "accepted" },
+    include: {
+      fromUser: { select: { id: true, name: true } },
+      share: { include: { folder: { select: { id: true, name: true } } } },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+  return accepted;
+}
+
+export async function getUserAcceptedShares(userId: string) {
+  return prisma.shareInvitation.findMany({
+    where: { toUserId: userId, status: "accepted" },
+    include: {
+      fromUser: { select: { id: true, name: true } },
+      share: true,
+    },
+    orderBy: { createdAt: "desc" },
+  });
+}
+
+export async function revokeAcceptedShare(invitationId: string, userId: string) {
+  const invitation = await prisma.shareInvitation.findUnique({
+    where: { id: invitationId },
+  });
+  if (!invitation || invitation.toUserId !== userId || invitation.status !== "accepted") return null;
+
+  if (invitation.shareId) {
+    await prisma.share.deleteMany({ where: { id: invitation.shareId } });
+  }
+  return prisma.shareInvitation.delete({ where: { id: invitationId } });
+}

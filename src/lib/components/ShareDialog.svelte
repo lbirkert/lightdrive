@@ -10,6 +10,7 @@
     onshare = (share: any) => {},
   } = $props();
 
+  let tab = $state<"link" | "user">("link");
   let permissions = $state("view");
   let expiry = $state("");
   let shareUrl = $state("");
@@ -18,6 +19,10 @@
   let existingShares = $state<any[]>([]);
   let loadingShares = $state(false);
   let copiedToken = $state<string | null>(null);
+
+  let inviteEmail = $state("");
+  let inviteSending = $state(false);
+  let inviteError = $state("");
 
   let permissionOptions = [
     { value: "view", label: "View" },
@@ -34,6 +39,9 @@
       error = "";
       existingShares = [];
       copiedToken = null;
+      inviteEmail = "";
+      inviteError = "";
+      tab = "link";
       if (type !== "drive") loadShares();
     }
   });
@@ -111,6 +119,26 @@
       existingShares = existingShares.filter((s) => s.id !== shareId);
     }
   }
+
+  async function sendInvite() {
+    if (!inviteEmail.trim()) return;
+    inviteSending = true;
+    inviteError = "";
+    const body: Record<string, any> = { email: inviteEmail.trim(), permissions };
+    if (type === "folder") { body.folderId = id; body.folderName = name; }
+    const res = await fetch("/api/shares/invite", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    if (res.ok) {
+      inviteEmail = "";
+    } else {
+      const r = await res.json();
+      inviteError = r.error || "Failed to send invitation";
+    }
+    inviteSending = false;
+  }
 </script>
 
 {#if open}
@@ -129,79 +157,124 @@
       tabindex="-1"
     >
       <h2>{name}</h2>
-      <form
-        onsubmit={(e) => {
-          e.preventDefault();
-          createShareLink();
-        }}
-      >
-        <div class="field">
-          <label for="share-permissions">Permissions</label>
-          <select id="share-permissions" bind:value={permissions}>
-            {#each permissionOptions as opt}
-              <option value={opt.value}>{opt.label}</option>
-            {/each}
-          </select>
-        </div>
-        <div class="field">
-          <label for="share-expiry">Expires at (optional)</label>
-          <input
-            id="share-expiry"
-            type="datetime-local"
-            bind:value={expiry}
-          />
-        </div>
-        {#if shareUrl}
+
+      <div class="tabs">
+        <button class="tab" class:active={tab === "link"} onclick={() => tab = "link"}>Create Link</button>
+        {#if type !== "file"}
+          <button class="tab" class:active={tab === "user"} onclick={() => tab = "user"}>Share with User</button>
+        {/if}
+      </div>
+
+      {#if tab === "link"}
+        <form
+          onsubmit={(e) => {
+            e.preventDefault();
+            createShareLink();
+          }}
+        >
           <div class="field">
-            <label for="share-url">Share URL</label>
-            <input id="share-url" value={shareUrl} readonly />
+            <label for="share-permissions">Permissions</label>
+            <select id="share-permissions" bind:value={permissions}>
+              {#each permissionOptions as opt}
+                <option value={opt.value}>{opt.label}</option>
+              {/each}
+            </select>
           </div>
-          <button
-            type="button"
-            class="btn-primary"
-            onclick={() => copyLink(shareUrl.split("/").pop() || "")}
-            >{copiedToken ? "Copied!" : "Copy Link"}</button
-          >
-        {:else}
+          <div class="field">
+            <label for="share-expiry">Expires at (optional)</label>
+            <input
+              id="share-expiry"
+              type="datetime-local"
+              bind:value={expiry}
+            />
+          </div>
+          {#if shareUrl}
+            <div class="field">
+              <label for="share-url">Share URL</label>
+              <input id="share-url" value={shareUrl} readonly />
+            </div>
+            <button
+              type="button"
+              class="btn-primary"
+              onclick={() => copyLink(shareUrl.split("/").pop() || "")}
+              >{copiedToken ? "Copied!" : "Copy Link"}</button
+            >
+          {:else}
+            <button
+              type="submit"
+              class="btn-primary"
+              disabled={creating}
+              >{creating ? "Creating..." : "Create Share Link"}</button
+            >
+          {/if}
+          {#if error}
+            <p class="error">{error}</p>
+          {/if}
+        </form>
+        {#if existingShares.length > 0}
+          <hr />
+          <h3>Existing Share Links</h3>
+          <ul class="share-list">
+            {#each existingShares as share}
+              <li>
+                <span
+                  >{share.file?.originalName ||
+                    share.folder?.name ||
+                    "Unknown"}</span
+                >
+                <span>{share.permissions}</span>
+                {#if share.expiresAt}<span
+                    >Expires {formatDate(share.expiresAt)}</span
+                  >{/if}
+                <button
+                  class="btn-sm"
+                  onclick={() => copyLink(share.token)}
+                  >{copiedToken === share.token
+                    ? "Copied!"
+                    : "Copy"}</button
+                >
+                <button class="btn-sm" onclick={() => revokeShare(share.id)}
+                  >Revoke</button
+                >
+              </li>
+            {/each}
+          </ul>
+        {/if}
+      {:else}
+        <form
+          onsubmit={(e) => {
+            e.preventDefault();
+            sendInvite();
+          }}
+        >
+          <div class="field">
+            <label for="invite-permissions">Permissions</label>
+            <select id="invite-permissions" bind:value={permissions}>
+              {#each permissionOptions as opt}
+                <option value={opt.value}>{opt.label}</option>
+              {/each}
+            </select>
+          </div>
+          <div class="field">
+            <label for="invite-email">User Email</label>
+            <input
+              id="invite-email"
+              type="email"
+              bind:value={inviteEmail}
+              placeholder="user@example.com"
+              required
+            />
+          </div>
           <button
             type="submit"
             class="btn-primary"
-            disabled={creating}
-            >{creating ? "Creating..." : "Create Share Link"}</button
+            disabled={inviteSending || !inviteEmail.trim()}
+            >{inviteSending ? "Sending..." : "Send Invitation"}</button
           >
-        {/if}
-        {#if error}
-          <p class="error">{error}</p>
-        {/if}
-      </form>
-      {#if existingShares.length > 0}
-        <hr />
-        <h3>Existing Share Links</h3>
-        <ul class="share-list">
-          {#each existingShares as share}
-            <li>
-              <span
-                >{share.file?.originalName ||
-                  share.folder?.name ||
-                  "Unknown"}</span
-              >
-              <span>{share.permissions}</span>
-              {#if share.expiresAt}<span
-                  >Expires {formatDate(share.expiresAt)}</span
-                >{/if}
-              <button
-                class="btn-sm"
-                onclick={() => copyLink(share.token)}
-                >{copiedToken === share.token
-                  ? "Copied!"
-                  : "Copy"}</button
-              >
-              <button class="btn-sm" onclick={() => revokeShare(share.id)}
-                >Revoke</button
-              >
-            </li>
-          {/each}
-        </ul>
+          {#if inviteError}
+            <p class="error">{inviteError}</p>
+          {/if}
+        </form>
       {/if}
       <button class="btn-ghost" onclick={onclose}>Close</button>
     </div>

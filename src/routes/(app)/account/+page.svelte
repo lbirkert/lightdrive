@@ -81,9 +81,9 @@
   </div>
 
   <div class="card">
-    <h3>Share Links</h3>
-    <p class="secondary">Manage all your active share links across files and folders.</p>
-    <a href="/account/shares" class="btn-primary">Manage Share Links</a>
+    <h3>Sharing</h3>
+    <p class="secondary">Manage your share links and view drives shared with you.</p>
+    <a href="/account/shares" class="btn-primary">Manage Sharing</a>
   </div>
 </div>
 

@@ -131,6 +131,7 @@ export class DriveStore {
   rawFiles = $derived(this.isShared ? this.sharedFiles : this.data.files ?? []);
   displayBreadcrumbs = $derived(this.isShared ? this.shareBreadcrumbs : this.data.breadcrumbs ?? []);
   displayFolderSizes = $derived(!this.isShared ? this.data.folderSizes : undefined);
+  acceptedDrives = $derived(this.data.acceptedDrives ?? []);
 
   filteredFolders = $derived.by(() => {
     let items = this.rawFolders;
@@ -172,7 +173,9 @@ export class DriveStore {
   canShareSelection = $derived(
     !this.isShared && !!this.singleSelected
   );
-  canMoveSelection = $derived(!this.isShared && this.selectedCount > 0);
+  canMoveSelection = $derived(
+    (!this.isShared || hasPermission(this.shareInfo, "structure")) && this.selectedCount > 0
+  );
   canDeleteSelection = $derived(this.canDelete && this.selectedCount > 0);
 
   constructor(data: PageData, kit: Kit, initialUrl?: URL) {

@@ -3,7 +3,7 @@
   import { ModeWatcher } from "mode-watcher";
   import { page } from "$app/stores";
   import { goto } from "$app/navigation";
-  import { Folder, BarChart3, LogIn, LogOut, User, Settings, Link, HardDrive, Menu } from "@lucide/svelte";
+  import { Folder, BarChart3, LogIn, LogOut, User, Settings, HardDrive, Menu, Share2 } from "@lucide/svelte";
   import UploadFooter from "$lib/components/UploadFooter.svelte";
   import { uploadStore } from "$lib/components/upload-store.svelte";
 
@@ -82,7 +82,7 @@
               <ul>
                 <li><a href="/account" class="nav-link" onclick={() => userMenuOpen = false}><User size={14} /> Account</a></li>
                 <li><a href="/account/preferences" class="nav-link" onclick={() => userMenuOpen = false}><Settings size={14} /> Preferences</a></li>
-                <li><a href="/account/shares" class="nav-link" onclick={() => userMenuOpen = false}><Link size={14} /> Share Links</a></li>
+                <li><a href="/account/shares" class="nav-link" onclick={() => userMenuOpen = false}><Share2 size={14} /> Sharing</a></li>
                 <li>
                   <button class="nav-link" onclick={() => { userMenuOpen = false; logout(); }}><LogOut size={14} /> Sign Out</button>
                 </li>
@@ -124,7 +124,7 @@
           <ul>
             <li><a href="/account" class="nav-link" onclick={() => { const cb = document.getElementById('mobile-menu-toggle') as HTMLInputElement; if (cb) cb.checked = false; }}><User size={18} /> Account</a></li>
             <li><a href="/account/preferences" class="nav-link" onclick={() => { const cb = document.getElementById('mobile-menu-toggle') as HTMLInputElement; if (cb) cb.checked = false; }}><Settings size={18} /> Preferences</a></li>
-            <li><a href="/account/shares" class="nav-link" onclick={() => { const cb = document.getElementById('mobile-menu-toggle') as HTMLInputElement; if (cb) cb.checked = false; }}><Link size={18} /> Share Links</a></li>
+            <li><a href="/account/shares" class="nav-link" onclick={() => { const cb = document.getElementById('mobile-menu-toggle') as HTMLInputElement; if (cb) cb.checked = false; }}><Share2 size={18} /> Sharing</a></li>
             <li>
               <button class="nav-link" onclick={() => { const cb = document.getElementById('mobile-menu-toggle') as HTMLInputElement; if (cb) cb.checked = false; logout(); }}><LogOut size={18} /> Sign Out</button>
             </li>

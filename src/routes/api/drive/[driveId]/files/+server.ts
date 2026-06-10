@@ -30,10 +30,6 @@ export const GET: RequestHandler = async ({ url, locals, params }) => {
 export const POST: RequestHandler = async ({ request, locals, params, url }) => {
   const ctx = await getDriveContext(params.driveId, locals, "insert");
   if (!ctx) return json({ error: "Drive not found or upload not permitted" }, { status: 404 });
-  if (ctx.type === "share" && !ctx.share?.folderId) {
-    return json({ error: "Can only upload to shared folders" }, { status: 400 });
-  }
-
   await mkdir(UPLOAD_DIR, { recursive: true });
   await mkdir(join(UPLOAD_DIR, "previews"), { recursive: true });
 

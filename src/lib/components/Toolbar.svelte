@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { Search, Plus, Upload, List, Grid3x3, Pen, Share2, ArrowRight, Trash2, X } from "@lucide/svelte";
+  import { Search, Plus, Upload, List, Grid3x3, Pen, Share2, ArrowRight, Trash2, X, ChevronDown, ChevronRight } from "@lucide/svelte";
+  import { goto } from "$app/navigation";
 
   type FilterOption = { value: string; label: string };
   type SortOption = { value: string; label: string };
@@ -34,6 +35,8 @@
     onsortchange?: (value: string) => void;
     filterOptions?: FilterOption[];
     sortOptions?: SortOption[];
+    acceptedDrives?: { id: string; name: string; token: string }[];
+    driveId?: string;
   };
 
   let {
@@ -45,6 +48,7 @@
     searchQuery = $bindable(""), filterType = $bindable("all"), sortMode = $bindable("date-desc"),
     searchOpen = $bindable(false),
     onsearchclear, onfilterchange, onsortchange,
+    acceptedDrives = [], driveId = "",
     filterOptions = [
       { value: "all", label: "All" },
       { value: "images", label: "Images" },
@@ -69,6 +73,34 @@
       queueMicrotask(() => searchInputEl?.focus());
     }
   });
+
+  let driveDropdownOpen = $state(false);
+  let driveDropdownDesktop = $state<HTMLElement | undefined>(undefined);
+  let driveDropdownMobile = $state<HTMLElement | undefined>(undefined);
+
+  function navigateToDrive(token: string) {
+    driveDropdownOpen = false;
+    goto(`/drive/${token}`);
+  }
+
+  function toggleDriveDropdown(e: Event) {
+    e.stopPropagation();
+    if (driveDropdownOpen) {
+      driveDropdownOpen = false;
+    } else {
+      driveDropdownOpen = true;
+      queueMicrotask(() => {
+        const handler = (ev: MouseEvent) => {
+          const anyOpen = driveDropdownDesktop?.contains(ev.target as Node) || driveDropdownMobile?.contains(ev.target as Node);
+          if (!anyOpen) {
+            driveDropdownOpen = false;
+            document.removeEventListener("click", handler);
+          }
+        };
+        document.addEventListener("click", handler);
+      });
+    }
+  }
 </script>
 
 <div class="toolbar">
@@ -93,14 +125,67 @@
       <nav class="breadcrumb-desktop">
         {#each breadcrumbs as crumb, i}
           {#if i > 0}<span class="breadcrumb-sep">/</span>{/if}
-          <a class="btn-ghost truncate breadcrumb-btn" href="/drive/{crumb.id || ''}" onclick={(e) => { e.preventDefault(); onnavigate?.(crumb.id); }}>{crumb.name}</a>
+          {#if i === 0 && acceptedDrives.length > 0}
+            <!-- svelte-ignore a11y_click_events_have_key_events -->
+            <div class="drive-dropdown" bind:this={driveDropdownDesktop}>
+              <button class="drive-dropdown-chevron" onclick={toggleDriveDropdown} aria-label="Switch drive">
+                {#if driveDropdownOpen}
+                  <ChevronDown size={14} />
+                {:else}
+                  <ChevronRight size={14} />
+                {/if}
+              </button>
+              <a class="btn-ghost breadcrumb-btn" href="/drive/{driveId}" onclick={(e) => { e.preventDefault(); navigateToDrive(driveId); }}>
+                {crumb.name}
+              </a>
+              {#if driveDropdownOpen}
+                <div class="drive-dropdown-menu">
+                  <a class="drive-dropdown-item" href="/drive/" onclick={(e) => { e.preventDefault(); driveDropdownOpen = false; navigateToDrive(""); }}>
+                    My Drive
+                  </a>
+                  {#each acceptedDrives as drive}
+                    <a class="drive-dropdown-item" href="/drive/{drive.token}" onclick={(e) => { e.preventDefault(); navigateToDrive(drive.token); }}>
+                      {drive.name}
+                    </a>
+                  {/each}
+                </div>
+              {/if}
+            </div>
+          {:else}
+            <a class="btn-ghost truncate breadcrumb-btn" href="/drive/{crumb.id || ''}" onclick={(e) => { e.preventDefault(); onnavigate?.(crumb.id); }}>{crumb.name}</a>
+          {/if}
         {/each}
       </nav>
       <nav class="breadcrumb-mobile">
         {#if breadcrumbs.length > 1}
           <a class="back-btn" href="/drive/{breadcrumbs[breadcrumbs.length - 2]?.id || ''}" onclick={(e) => { e.preventDefault(); onnavigate?.(breadcrumbs[breadcrumbs.length - 2]?.id); }} aria-label="Back">&larr;</a>
         {/if}
-        <span class="current-folder">{breadcrumbs[breadcrumbs.length - 1]?.name ?? ""}</span>
+        {#if acceptedDrives.length > 0 && breadcrumbs.length === 1}
+          <div class="drive-dropdown" bind:this={driveDropdownMobile}>
+            <button class="drive-dropdown-chevron" onclick={toggleDriveDropdown} aria-label="Switch drive">
+              {#if driveDropdownOpen}
+                <ChevronDown size={14} />
+              {:else}
+                <ChevronRight size={14} />
+              {/if}
+            </button>
+            <span class="current-folder">{breadcrumbs[breadcrumbs.length - 1]?.name ?? ""}</span>
+            {#if driveDropdownOpen}
+              <div class="drive-dropdown-menu">
+                <a class="drive-dropdown-item" href="/drive/" onclick={(e) => { e.preventDefault(); driveDropdownOpen = false; navigateToDrive(""); }}>
+                  My Drive
+                </a>
+                {#each acceptedDrives as drive}
+                  <a class="drive-dropdown-item" href="/drive/{drive.token}" onclick={(e) => { e.preventDefault(); navigateToDrive(drive.token); }}>
+                    {drive.name}
+                  </a>
+                {/each}
+              </div>
+            {/if}
+          </div>
+        {:else}
+          <span class="current-folder">{breadcrumbs[breadcrumbs.length - 1]?.name ?? ""}</span>
+        {/if}
       </nav>
       <button class="btn-ghost" onclick={() => searchOpen = !searchOpen}><Search size={14} /> <span class="m-hide">Search</span></button>
       {#if showNewButton}

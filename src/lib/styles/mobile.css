@@ -60,6 +60,11 @@
     display: none;
   }
 
+  .drive-dropdown-chevron svg {
+    width: 18px;
+    height: 18px;
+  }
+
   .preview-toolbar {
     align-items: start !important;
     flex-direction: column;

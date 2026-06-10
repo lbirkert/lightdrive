@@ -17,6 +17,8 @@ model User {
   folders      Folder[]
   sessions     Session[]
   shares       Share[]
+  sentInvitations     ShareInvitation[] @relation("SentInvitations")
+  receivedInvitations ShareInvitation[] @relation("ReceivedInvitations")
 }
 
 model Session {
@@ -70,4 +72,21 @@ model Share {
   permissions String   @default("read")
   expiresAt   DateTime?
   createdAt   DateTime @default(now())
+  invitations ShareInvitation[]
+}
+
+model ShareInvitation {
+  id          String    @id @default(cuid())
+  fromUserId  String
+  fromUser    User      @relation("SentInvitations", fields: [fromUserId], references: [id], onDelete: Cascade)
+  toUserId    String
+  toUser      User      @relation("ReceivedInvitations", fields: [toUserId], references: [id], onDelete: Cascade)
+  shareId     String?
+  share       Share?    @relation(fields: [shareId], references: [id], onDelete: SetNull)
+  folderId    String?
+  folderName  String?
+  permissions String    @default("view")
+  status      String    @default("pending")
+  createdAt   DateTime  @default(now())
+  respondedAt DateTime?
 }

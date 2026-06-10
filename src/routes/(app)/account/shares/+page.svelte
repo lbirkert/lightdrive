@@ -3,9 +3,12 @@
 
   let { data } = $props();
 
-  let shares = $state([]);
+  let shares = $state<any[]>([]);
+  let pending = $state<any[]>([]);
+  let accepted = $state<any[]>([]);
+  let message = $state("");
 
-  $effect(() => { shares = data.shares; });
+  $effect(() => { shares = data.shares; pending = data.pending; accepted = data.accepted; });
 
   let showRevokeConfirm = $state(false);
   let revokeTargetId = $state("");
@@ -18,6 +21,8 @@
   let showShareDialog = $state(false);
 
   let copiedToken = $state<string | null>(null);
+  let responding = $state<string | null>(null);
+  let revoking = $state<string | null>(null);
 
   function shareUrl(token: string) { return `${location.origin}/drive/${token}`; }
 
@@ -34,7 +39,7 @@
     if (res.ok) { shares = shares.filter((s: any) => s.id !== revokeTargetId); showRevokeConfirm = false; }
   }
 
-  function openEdit(share: any) {
+  function openEditLink(share: any) {
     editingShare = share;
     editPermissions = share.permissions;
     editExpiry = share.expiresAt ? new Date(share.expiresAt).toISOString().slice(0, 16) : "";
@@ -52,8 +57,6 @@
     if (res.ok) { const r = await res.json(); shares = shares.map((s: any) => s.id === r.share.id ? r.share : s); showEditModal = false; editingShare = null; }
   }
 
-  function formatDate(d: string | Date) { return new Date(d).toLocaleDateString(); }
-
   function shareName(share: any) {
     if (share.file) return share.file.originalName;
     if (share.folder) return share.folder.name;
@@ -66,6 +69,49 @@
     showShareDialog = false;
   }
 
+  function shareLabel(inv: any) {
+    if (inv.folderName) return `shared folder "${inv.folderName}"`;
+    return "shared their drive";
+  }
+
+  async function respond(id: string, action: "accept" | "decline") {
+    responding = id;
+    message = "";
+    const res = await fetch(`/api/shares/invitations/${id}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action }),
+    });
+    if (res.ok) {
+      pending = pending.filter((i: any) => i.id !== id);
+      message = action === "accept" ? "Access granted!" : "Declined.";
+    } else {
+      const r = await res.json();
+      message = r.error || "Failed to respond";
+    }
+    responding = null;
+  }
+
+  async function revokeAccess(invitationId: string) {
+    revoking = invitationId;
+    message = "";
+    const res = await fetch(`/api/shares/revoke-access`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ invitationId }),
+    });
+    if (res.ok) {
+      accepted = accepted.filter((a: any) => a.id !== invitationId);
+      message = "Access revoked.";
+    } else {
+      const r = await res.json();
+      message = r.error || "Failed to revoke";
+    }
+    revoking = null;
+  }
+
+  function formatDate(d: string | Date) { return new Date(d).toLocaleDateString(); }
+
   let permissionOptions = [
     { value: "view", label: "View" },
     { value: "view,insert", label: "View & Insert" },
@@ -75,17 +121,23 @@
 </script>
 
 <div class="page page:sm shares-page">
-  <h1>Share Links</h1>
+  <h1>Sharing</h1>
 
   <a href="/account" class="back-link">&larr; Back to Account</a>
+
+  {#if message}
+    <p class="success">{message}</p>
+  {/if}
 
   <button class="btn-primary" onclick={() => showShareDialog = true}>
     Share Drive
   </button>
 
+  <!-- Share Links -->
+  <h2>Share Links</h2>
   {#if shares.length === 0}
     <div class="card empty-state">
-      <p class="secondary">No share links yet.</p>
+      <p class="secondary">No share links yet. Share your drive with a link above.</p>
     </div>
   {:else}
     <ul class="share-list">
@@ -105,12 +157,70 @@
           </div>
           <div class="share-actions">
             <button class="btn-sm" onclick={() => copyLink(share.token)}>{copiedToken === share.token ? "Copied!" : "Copy Link"}</button>
-            <button class="btn-sm" onclick={() => openEdit(share)}>Edit</button>
+            <button class="btn-sm" onclick={() => openEditLink(share)}>Edit</button>
             <button class="btn-sm" onclick={() => { revokeTargetId = share.id; showRevokeConfirm = true; }}>Revoke</button>
           </div>
         </li>
       {/each}
     </ul>
+  {/if}
+
+  <!-- Shared With You -->
+  <h2>Shared With You</h2>
+
+  {#if pending.length > 0}
+    <h3>Pending Requests</h3>
+    <ul class="share-list">
+      {#each pending as inv}
+        <li class="card">
+          <div class="share-info">
+            <span class="share-name">{inv.fromUser.name} {shareLabel(inv)}</span>
+            <span class="share-perms">{inv.permissions}</span>
+          </div>
+          <div class="share-meta">
+            <span class="tertiary">{formatDate(inv.createdAt)}</span>
+          </div>
+          {#if responding === inv.id}
+            <p class="secondary">Processing...</p>
+          {:else}
+            <div class="share-actions">
+              <button class="btn-primary" onclick={() => respond(inv.id, "accept")}>Accept</button>
+              <button class="btn-ghost" onclick={() => respond(inv.id, "decline")}>Decline</button>
+            </div>
+          {/if}
+        </li>
+      {/each}
+    </ul>
+  {/if}
+
+  {#if accepted.length > 0}
+    <h3>Accepted</h3>
+    <ul class="share-list">
+      {#each accepted as acc}
+        <li class="card">
+          <div class="share-info">
+            <span class="share-name">{acc.fromUser.name} {shareLabel(acc)}</span>
+            <span class="share-perms">{acc.permissions}</span>
+          </div>
+          <div class="share-meta">
+            <span class="tertiary">Accepted {formatDate(acc.respondedAt)}</span>
+          </div>
+          {#if revoking === acc.id}
+            <p class="secondary">Revoking...</p>
+          {:else}
+            <div class="share-actions">
+              <button class="btn-ghost" onclick={() => revokeAccess(acc.id)}>Revoke Access</button>
+            </div>
+          {/if}
+        </li>
+      {/each}
+    </ul>
+  {/if}
+
+  {#if pending.length === 0 && accepted.length === 0}
+    <div class="card empty-state">
+      <p class="secondary">Nothing shared with you yet.</p>
+    </div>
   {/if}
 </div>
 

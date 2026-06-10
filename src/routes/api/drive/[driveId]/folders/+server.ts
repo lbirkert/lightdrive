@@ -8,7 +8,9 @@ export const GET: RequestHandler = async ({ url, locals, params }) => {
 
   const all = url.searchParams.get("all");
   if (all === "true") {
-    if (ctx.type === "share") return json({ error: "Not available for shared drives" }, { status: 403 });
+    if (ctx.type === "share" && ctx.share?.folderId) {
+      return json({ error: "Not available for shared drives" }, { status: 403 });
+    }
     const folders = await getAllFolders(ctx.userId);
     return json({ folders });
   }

@@ -50,6 +50,12 @@ export interface ShareInfo {
   token?: string;
 }
 
+export interface AcceptedDrive {
+  id: string;
+  name: string;
+  token: string;
+}
+
 export interface PageData {
   driveId: string;
   isShared: boolean;
@@ -62,4 +68,5 @@ export interface PageData {
   files?: FileItem[];
   folderSizes?: Record<string, number>;
   breadcrumbs?: BreadcrumbItem[];
+  acceptedDrives?: AcceptedDrive[];
 }

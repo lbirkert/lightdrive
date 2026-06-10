@@ -1,7 +1,7 @@
 import { json, error } from "@sveltejs/kit";
 import { unlink } from "node:fs/promises";
 import { join } from "node:path";
-import { getFile, getFolder, deleteFileRecord, moveFile, renameFile, getDriveContext, isFileInSharedFolder } from "$lib/server/db";
+import { getFile, getFolder, deleteFileRecord, moveFile, renameFile, getDriveContext, isFileInSharedFolder, isFolderInSharedFolder } from "$lib/server/db";
 import type { RequestHandler } from "./$types";
 
 const UPLOAD_DIR = join(process.cwd(), "uploads");
@@ -30,9 +30,14 @@ export const PATCH: RequestHandler = async ({ request, params, locals }) => {
     return json({ renamed: params.fileId, name: body.name });
   }
 
-  if (ctx.type === "share") return json({ error: "Move not supported in shared drives" }, { status: 403 });
-
   const { folderId } = body;
+  if (ctx.type === "share" && ctx.share?.folderId) {
+    const targetFolder = folderId || null;
+    if (targetFolder && !(await isFolderInSharedFolder(targetFolder, ctx.share.folderId))) {
+      return json({ error: "Folder not in shared drive" }, { status: 403 });
+    }
+  }
+
   if (folderId) {
     const folder = await getFolder(folderId);
     if (!folder || folder.userId !== ctx.userId) {
@@ -51,7 +56,6 @@ export const DELETE: RequestHandler = async ({ params, locals }) => {
   if (ctx.type === "share") {
     const perms = (ctx.share?.permissions || "").split(",").map(p => p.trim());
     if (!perms.includes("structure")) error(403, "Structure permission not granted");
-    if (!ctx.share?.folderId) error(400, "Can only delete from shared folders");
   }
 
   const file = await getFile(params.fileId);
