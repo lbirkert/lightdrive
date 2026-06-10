@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { uploadStore } from "$lib/rewrite/upload-store.svelte";
-  import { formatSpeed, formatEta } from "$lib/rewrite/drive-utils";
+  import { uploadStore } from "$lib/components/upload-store.svelte";
+  import { formatSpeed, formatEta } from "$lib/components/drive-utils";
   import { Check, ChevronDown, ChevronUp, X } from "@lucide/svelte";
 
   $effect(() => {

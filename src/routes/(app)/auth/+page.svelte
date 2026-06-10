@@ -1,86 +1,142 @@
 <script lang="ts">
-  import { Button, Card, Flex, Form, Heading, Input, Tabs, Text, Modal } from "flewui";
-  import { pipe, required, email, minLength, matchesField } from "flewui";
-  import { LogIn } from "@lucide/svelte";
   import { goto } from "$app/navigation";
+  import { required, email, minLength, pipe } from "$lib/validators";
+  import type { Rule } from "$lib/validators";
 
   let tab = $state("login");
-  let errorMessage = $state("");
-  let showError = $state(false);
 
-  async function handleLogin(_data: unknown, e: Event) {
-    const form = e.currentTarget as HTMLFormElement;
-    const fd = new FormData(form);
-    const email = fd.get("l-email");
-    const password = fd.get("l-password");
+  let errors = $state<Record<string, string>>({});
+  let loading = $state(false);
+  let serverError = $state("");
+
+  let lEmail = $state("");
+  let lPassword = $state("");
+  let lShowPassword = $state(false);
+
+  let sName = $state("");
+  let sEmail = $state("");
+  let sPassword = $state("");
+  let sShowPassword = $state(false);
+
+  function validateLogin() {
+    const e: Record<string, string> = {};
+    const chk = (id: string, val: string, rule: Rule) => {
+      const msg = rule(val);
+      if (msg) e[id] = msg;
+    };
+    chk("l-email", lEmail, pipe(required(), email()));
+    chk("l-password", lPassword, pipe(required(), minLength(8)));
+    return e;
+  }
+
+  function validateSignup() {
+    const e: Record<string, string> = {};
+    const chk = (id: string, val: string, rule: Rule) => {
+      const msg = rule(val);
+      if (msg) e[id] = msg;
+    };
+    chk("s-name", sName, required());
+    chk("s-email", sEmail, pipe(required(), email()));
+    chk("s-password", sPassword, pipe(required(), minLength(8)));
+    return e;
+  }
+
+  async function handleLogin(e: SubmitEvent) {
+    e.preventDefault();
+    const v = validateLogin();
+    errors = v;
+    if (Object.keys(v).length) return;
+    loading = true;
+    serverError = "";
     const res = await fetch("/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email: lEmail, password: lPassword }),
     });
-    if (res.ok) goto("/drive");
-    else { const r = await res.json(); errorMessage = r.error; showError = true; }
+    loading = false;
+    if (res.ok) goto("/ui-rewrite/drive");
+    else { const r = await res.json(); serverError = r.error || "Something went wrong"; }
   }
 
-  async function handleSignup(_data: unknown, e: Event) {
-    const form = e.currentTarget as HTMLFormElement;
-    const fd = new FormData(form);
-    const name = fd.get("s-name");
-    const email = fd.get("s-email");
-    const password = fd.get("s-password");
+  async function handleSignup(e: SubmitEvent) {
+    e.preventDefault();
+    const v = validateSignup();
+    errors = v;
+    if (Object.keys(v).length) return;
+    loading = true;
+    serverError = "";
     const res = await fetch("/api/auth/signup", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, password }),
+      body: JSON.stringify({ name: sName, email: sEmail, password: sPassword }),
     });
-    if (res.ok) goto("/drive");
-    else { const r = await res.json(); errorMessage = r.error; showError = true; }
+    loading = false;
+    if (res.ok) goto("/ui-rewrite/drive");
+    else { const r = await res.json(); serverError = r.error || "Something went wrong"; }
   }
 
-  async function handleLogout() {
-    await fetch("/api/auth/logout", { method: "POST" });
-    goto("/");
+  function focusField(key: string) {
+    const next = { ...errors };
+    delete next[key];
+    errors = next;
   }
 </script>
 
-<Flex direction="vertical" gap="var(--flew-spacing-6)" style="padding: var(--flew-spacing-6); max-width: 420px; margin: 0 auto;">
-  <Flex direction="vertical" gap="var(--flew-spacing-1)" align="center">
-    <LogIn size={28} />
-    <Heading depth={1} margin="none">Welcome</Heading>
-    <Text color="secondary">Sign in or create an account</Text>
-  </Flex>
+<div class="auth-page">
+  <div class="auth-container">
+    <div class="auth-header">
+      <h1>Welcome</h1>
+      <p>Sign in or create an account</p>
+    </div>
 
-  <Card variant="outlined" paddingSize="lg">
-    <Tabs bind:value={tab} tabs={[
-      { value: "login", label: "Sign In" },
-      { value: "signup", label: "Sign Up" },
-    ]}>
+    <div class="auth-card">
+      <div class="tabs">
+        <button class="tab" class:active={tab === "login"} onclick={() => { tab = "login"; errors = {}; serverError = ""; }}>Sign In</button>
+        <button class="tab" class:active={tab === "signup"} onclick={() => { tab = "signup"; errors = {}; serverError = ""; }}>Sign Up</button>
+      </div>
+
       {#if tab === "login"}
-        <Form onSubmit={handleLogin}>
-          <Input id="l-email" type="email" label="Email" placeholder="you@example.com" required validate={pipe(required(), email())} />
-          <Input id="l-password" type="password" label="Password" placeholder="Enter password" required validate={pipe(required(), minLength(8))} />
-          {#snippet actions()}
-            <Button variant="primary" type="submit" fullWidth>Sign In</Button>
-          {/snippet}
-        </Form>
+        <form class="auth-form" onsubmit={handleLogin} novalidate>
+          <div class="field" class:field-error={errors["l-email"]}>
+            <label for="l-email">Email</label>
+            <input id="l-email" type="email" placeholder="you@example.com" bind:value={lEmail} oninput={() => focusField("l-email")} />
+            {#if errors["l-email"]}<span class="field-msg">{errors["l-email"]}</span>{/if}
+          </div>
+          <div class="field" class:field-error={errors["l-password"]}>
+            <label for="l-password">Password</label>
+            <div class="password-wrap">
+              <input id="l-password" type={lShowPassword ? "text" : "password"} placeholder="Enter password" bind:value={lPassword} oninput={() => focusField("l-password")} />
+              <button type="button" class="password-toggle" onclick={() => lShowPassword = !lShowPassword} aria-label="Toggle password visibility">{lShowPassword ? "Hide" : "Show"}</button>
+            </div>
+            {#if errors["l-password"]}<span class="field-msg">{errors["l-password"]}</span>{/if}
+          </div>
+          {#if serverError}<p class="server-error">{serverError}</p>{/if}
+          <button type="submit" class="btn-primary" disabled={loading}>{loading ? "Signing in\u2026" : "Sign In"}</button>
+        </form>
       {:else}
-        <Form onSubmit={handleSignup}>
-          <Input id="s-name" label="Full Name" placeholder="Jane Doe" required validate={required()} />
-          <Input id="s-email" type="email" label="Email" placeholder="you@example.com" required validate={pipe(required(), email())} />
-          <Input id="s-password" type="password" label="Password" placeholder="Create a password" required validate={pipe(required(), minLength(8))} />
-          <Input id="s-password-repeat" type="password" label="Repeat Password" placeholder="Repeat your password" required validate={pipe(required(), matchesField("s-password", "Passwords must match"))} />
-          {#snippet actions()}
-            <Button variant="primary" type="submit" fullWidth>Create Account</Button>
-          {/snippet}
-        </Form>
+        <form class="auth-form" onsubmit={handleSignup} novalidate>
+          <div class="field" class:field-error={errors["s-name"]}>
+            <label for="s-name">Full Name</label>
+            <input id="s-name" placeholder="Jane Doe" bind:value={sName} oninput={() => focusField("s-name")} />
+            {#if errors["s-name"]}<span class="field-msg">{errors["s-name"]}</span>{/if}
+          </div>
+          <div class="field" class:field-error={errors["s-email"]}>
+            <label for="s-email">Email</label>
+            <input id="s-email" type="email" placeholder="you@example.com" bind:value={sEmail} oninput={() => focusField("s-email")} />
+            {#if errors["s-email"]}<span class="field-msg">{errors["s-email"]}</span>{/if}
+          </div>
+          <div class="field" class:field-error={errors["s-password"]}>
+            <label for="s-password">Password</label>
+            <div class="password-wrap">
+              <input id="s-password" type={sShowPassword ? "text" : "password"} placeholder="Create a password" bind:value={sPassword} oninput={() => focusField("s-password")} />
+              <button type="button" class="password-toggle" onclick={() => sShowPassword = !sShowPassword} aria-label="Toggle password visibility">{sShowPassword ? "Hide" : "Show"}</button>
+            </div>
+            {#if errors["s-password"]}<span class="field-msg">{errors["s-password"]}</span>{/if}
+          </div>
+          {#if serverError}<p class="server-error">{serverError}</p>{/if}
+          <button type="submit" class="btn-primary" disabled={loading}>{loading ? "Creating account\u2026" : "Create Account"}</button>
+        </form>
       {/if}
-    </Tabs>
-  </Card>
-</Flex>
-
-<Modal bind:open={showError} title="Error" onClose={() => showError = false}>
-  <Text color="error">{errorMessage}</Text>
-  {#snippet footer()}
-    <Button variant="primary" onclick={() => showError = false}>OK</Button>
-  {/snippet}
-</Modal>
+    </div>
+  </div>
+</div>

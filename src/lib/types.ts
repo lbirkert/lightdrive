@@ -1,27 +1,65 @@
-export type { User, Session, Folder, File, Share } from "./server/prisma-client/browser";
-
-export type Item = Record<string, any>;
-
 export type ViewMode = "list" | "grid";
 
 export type SortMode = "name-asc" | "name-desc" | "date-desc" | "date-asc" | "size-desc" | "size-asc";
 
-export type UploadFileState = {
+export type NewItemType = "folder" | "txt" | "md" | "csv";
+
+export interface UploadFileState {
   name: string;
   totalBytes: number;
   uploadedBytes: number;
   speed: number;
   eta: number;
   done: boolean;
-};
+}
 
-export type FilterOption = { value: string; label: string };
-export type SortOption = { value: string; label: string };
+export interface ShareDialogState {
+  id: string;
+  name: string;
+  type: "file" | "folder";
+}
 
-export type DriveContext = {
-  type: "user" | "share";
-  userId: string;
-  share?: { folderId: string | null; fileId: string | null; permissions: string };
-};
+export interface FileItem {
+  id: string;
+  originalName: string;
+  type: string;
+  size: number;
+  uploadedAt: string | Date;
+  hasPreview: boolean;
+  name?: string;
+}
 
-export type Breadcrumb = { id: string | null; name: string };
+export interface FolderItem {
+  id: string;
+  name: string;
+  parentId: string | null;
+  createdAt?: string | Date;
+}
+
+export interface BreadcrumbItem {
+  id: string | null;
+  name: string;
+}
+
+export interface ShareInfo {
+  type: "file" | "folder";
+  file?: { id: string; name: string; type: string; size: number };
+  folder?: any;
+  permissions: string;
+  createdAt?: string;
+  token?: string;
+}
+
+export interface PageData {
+  driveId: string;
+  isShared: boolean;
+  user: any;
+  shareInfo?: ShareInfo | null;
+  sharedFolders?: FolderItem[];
+  sharedFiles?: FileItem[];
+  shareBreadcrumbs?: BreadcrumbItem[];
+  folders?: FolderItem[];
+  files?: FileItem[];
+  folderSizes?: Record<string, number>;
+  breadcrumbs?: BreadcrumbItem[];
+}

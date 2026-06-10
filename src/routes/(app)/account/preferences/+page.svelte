@@ -1,25 +1,21 @@
 <script lang="ts">
   import { mode, setMode } from "mode-watcher";
-  import { Card, Flex, Heading, Text, Select } from "flewui";
 </script>
 
-<Flex direction="vertical" gap="var(--flew-spacing-6)" style="padding: var(--flew-spacing-6); max-width: 640px; margin: 0 auto;">
-  <Heading depth={1}>Preferences</Heading>
+<div class="page page:sm">
+  <h1>Preferences</h1>
 
-  <Card variant="outlined" paddingSize="lg">
-    <Flex direction="vertical" gap="var(--flew-spacing-4)">
-      <Heading depth={3} margin="none">Theme</Heading>
-      <Text size="sm" color="secondary">Choose how LightDrive looks. System follows your OS preference.</Text>
+  <div class="card">
+    <h3>Theme</h3>
+    <p class="secondary">Choose how LightDrive looks. System follows your OS preference.</p>
 
-      <Select
-        value={mode.current}
-        onchange={(e) => setMode(e.currentTarget.value)}
-        options={[
-          { value: "light", label: "Light" },
-          { value: "dark", label: "Dark" },
-          { value: "system", label: "System" },
-        ]}
-      />
-    </Flex>
-  </Card>
-</Flex>
+    <div class="field">
+      <label for="theme-select">Theme</label>
+      <select id="theme-select" value={mode.current} onchange={(e) => setMode((e.target as HTMLSelectElement).value)}>
+        <option value="light">Light</option>
+        <option value="dark">Dark</option>
+        <option value="system">System</option>
+      </select>
+    </div>
+  </div>
+</div>

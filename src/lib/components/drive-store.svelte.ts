@@ -1,10 +1,10 @@
-import { getFileIconClass } from "./helpers";
-import type { ViewMode, SortMode, NewItemType, UploadFileState, ShareDialogState, PageData } from "./types";
+import { getFileIconClass } from "../helpers";
+import type { ViewMode, SortMode, NewItemType, UploadFileState, ShareDialogState, PageData } from "../types";
 import {
   DRIVE_CHUNK_SIZE, formatSpeed, formatEta, getFileCategory,
   currentFolderId, hasPermission, createFolderSortFn, createFileSortFn,
   updateSortValue as computeNextSortMode, sortIndicator as getSortIndicator,
-} from "./drive-utils";
+} from "../drive-utils";
 import { uploadStore } from "./upload-store.svelte";
 
 interface Kit {

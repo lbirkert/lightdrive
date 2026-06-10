@@ -1,4 +1,4 @@
-import type { UploadFileState } from "./types";
+import type { UploadFileState } from "../types";
 
 export class UploadStore {
   files = $state<UploadFileState[]>([]);

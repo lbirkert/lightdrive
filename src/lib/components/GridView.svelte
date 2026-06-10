@@ -1,8 +1,7 @@
 <script lang="ts">
-  import { Button, Flex, Text } from "flewui";
-  import { File, Folder } from "@lucide/svelte";
   import { formatSize, getPreviewUrl, isImageType, isVideoType } from "./helpers";
-
+  import { Folder, FileText } from "@lucide/svelte";
+../helpers
   let failedImages = $state<Set<string>>(new Set());
   function imgError(fileId: string) {
     failedImages.add(fileId);
@@ -43,36 +42,19 @@
   }
 
   function touchEnd() {
-    if (longPressTimer) {
-      clearTimeout(longPressTimer);
-      longPressTimer = null;
-    }
+    if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
   }
 
   function touchMove() {
-    if (longPressTimer) {
-      clearTimeout(longPressTimer);
-      longPressTimer = null;
-    }
+    if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
   }
 
   function handleClick(e: MouseEvent, id: string, isFolder: boolean) {
-    if (longPressFired) {
-      longPressFired = false;
-      return;
-    }
-    if (longPressTimer) {
-      clearTimeout(longPressTimer);
-      longPressTimer = null;
-    }
-    if (e.ctrlKey || e.metaKey) {
-      ontoggleselection?.(id);
-    } else if (selectedIds.size > 0) {
-      ontoggleselection?.(id);
-    } else {
-      if (isFolder) onnavigate?.(id);
-      else onopenfilepreview?.(id);
-    }
+    if (longPressFired) { longPressFired = false; return; }
+    if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+    if (e.ctrlKey || e.metaKey) { ontoggleselection?.(id); }
+    else if (selectedIds.size > 0) { ontoggleselection?.(id); }
+    else { if (isFolder) onnavigate?.(id); else onopenfilepreview?.(id); }
   }
 </script>
 
@@ -91,12 +73,10 @@
         tabindex={0}
         onkeydown={(e) => { if (e.key === "Enter") handleClick(e, f.id, true); }}
       >
-        <div class="grid-preview grid-folder-preview">
-          <Folder size={48} />
-        </div>
+        <div class="grid-preview"><Folder size={24} /></div>
         <div class="grid-info">
-          <Text size="sm" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block;">{f.name}</Text>
-          <Text size="xs" color="tertiary">{formatSize(folderSizes[f.id] ?? 0)}</Text>
+          <span class="grid-name">{f.name}</span>
+          <span class="grid-size">{formatSize(folderSizes[f.id] ?? 0)}</span>
         </div>
       </div>
     {/each}
@@ -119,89 +99,16 @@
           {:else if isImageType(f.type)}
             <img src="/api/drive/{driveId}/files/{f.id}/download" alt={f.originalName} class="grid-thumb" loading="lazy" />
           {:else}
-            <File size={48} />
+            <FileText size={24} />
           {/if}
         </div>
         <div class="grid-info">
-          <Text size="sm" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block;">{f.originalName}</Text>
-          <Text size="xs" color="tertiary">{formatSize(f.size)}</Text>
+          <span class="grid-name">{f.originalName}</span>
+          <span class="grid-size">{formatSize(f.size)}</span>
         </div>
       </div>
     {/each}
   </div>
 {:else}
-  <Flex align="center" justify="center" style="height: 100%;">
-    <Text color="tertiary">{emptyMessage}</Text>
-  </Flex>
+  <div class="empty-state">{emptyMessage}</div>
 {/if}
-
-<style>
-  .grid-view {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: var(--flew-spacing-3);
-    padding: 16px;
-  }
-
-  .grid-item {
-    border: 1px solid var(--flew-color-border);
-    border-radius: var(--flew-radius-md);
-    overflow: hidden;
-    cursor: pointer;
-    transition: all var(--flew-transition-fast);
-    background: var(--flew-color-bg);
-  }
-
-  .grid-item:hover {
-    border-color: var(--flew-color-text-tertiary);
-    box-shadow: var(--flew-shadow-sm);
-  }
-
-  .grid-item.selected {
-    border-color: var(--flew-color-primary);
-    box-shadow: 0 0 0 1px var(--flew-color-primary);
-  }
-
-  .grid-preview {
-    height: 140px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--flew-color-bg-hover);
-    overflow: hidden;
-  }
-
-  .grid-folder-preview {
-    background: var(--flew-color-bg-active);
-    color: var(--flew-color-text-secondary);
-  }
-
-  .grid-thumb {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .grid-info {
-    padding: 8px 10px;
-  }
-
-  @media (max-width: 768px) {
-    .grid-view {
-      gap: var(--flew-spacing-3);
-      padding: 12px;
-    }
-
-    .grid-preview {
-      height: 180px;
-    }
-
-    .grid-item {
-      font-size: 14px;
-    }
-
-    .grid-info :global(.flew-text--sm) {
-      font-size: 14px !important;
-    }
-  }
-</style>

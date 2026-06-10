@@ -30,7 +30,6 @@ export const load: PageServerLoad = async ({ locals, depends, url, params }) => 
     return { user, driveId, folders, files, breadcrumbs, folderSizes, isShared: false };
   }
 
-  // Shared drive
   const share = await getShare(driveId);
   if (!share) error(404, "Share link not found.");
   if (share.expiresAt && share.expiresAt < new Date()) error(410, "This share link has expired.");

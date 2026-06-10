@@ -3,7 +3,7 @@ import { getTotalStats, getFileTypeBreakdown, getRecentUploads, getTopDownloads,
 import type { PageServerLoad } from "./$types";
 
 export const load: PageServerLoad = async ({ locals }) => {
-  if (!locals.user) redirect(302, "/auth");
+  if (!locals.user) redirect(302, "/ui-rewrite/auth");
 
   const [stats, breakdown, recentUploads, topDownloads, sizeDist] = await Promise.all([
     getTotalStats(locals.user.id),
