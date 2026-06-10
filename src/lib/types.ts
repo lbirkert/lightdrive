@@ -16,7 +16,7 @@ export interface UploadFileState {
 export interface ShareDialogState {
   id: string;
   name: string;
-  type: "file" | "folder";
+  type: "file" | "folder" | "drive";
 }
 
 export interface FileItem {

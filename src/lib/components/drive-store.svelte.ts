@@ -119,7 +119,7 @@ export class DriveStore {
   );
   
   canEdit = $derived(
-    !this.isShared || (this.isShared && this.shareInfo?.type === "file" && hasPermission(this.shareInfo, "edit"))
+    !this.isShared || hasPermission(this.shareInfo, "edit")
   );
   previewEditable = $derived(
     this.canEdit && this.previewCategory

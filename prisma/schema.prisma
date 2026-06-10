@@ -16,6 +16,7 @@ model User {
   files        File[]
   folders      Folder[]
   sessions     Session[]
+  shares       Share[]
 }
 
 model Session {
@@ -63,6 +64,8 @@ model Share {
   file        File?    @relation(fields: [fileId], references: [id], onDelete: Cascade)
   folderId    String?
   folder      Folder?  @relation(fields: [folderId], references: [id], onDelete: Cascade)
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
   token       String   @unique @default(cuid())
   permissions String   @default("read")
   expiresAt   DateTime?

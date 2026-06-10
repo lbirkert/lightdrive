@@ -25,6 +25,7 @@
   import FilePreview from "$lib/components/FilePreview.svelte";
   import ListView from "$lib/components/ListView.svelte";
   import GridView from "$lib/components/GridView.svelte";
+  import ShareDialog from "$lib/components/ShareDialog.svelte";
   import { DriveStore } from "$lib/components/drive-store.svelte.js";
   import { uploadStore } from "$lib/components/upload-store.svelte.js";
 
@@ -306,102 +307,13 @@
   {/if}
 </div>
 
-<!-- Share Dialog -->
-{#if !store.isShared && store.shareDialogOpen && store.showShareDialog}
-  <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
-  <div
-    class="modal-overlay"
-    role="button"
-    tabindex="0"
-    onclick={store.closeShareDialog}
-  >
-    <!-- svelte-ignore a11y_click_events_have_key_events a11y_interactive_supports_focus -->
-    <div
-      class="modal"
-      onclick={(e) => e.stopPropagation()}
-      role="dialog"
-      tabindex="-1"
-    >
-      <h2>{store.showShareDialog.name}</h2>
-      <form
-        onsubmit={(e) => {
-          e.preventDefault();
-          store.createShareLink();
-        }}
-      >
-        <div class="field">
-          <label for="share-permissions">Permissions</label>
-          <select id="share-permissions" bind:value={store.sharePermissions}>
-            {#each store.permissionOptions as opt}
-              <option value={opt.value}>{opt.label}</option>
-            {/each}
-          </select>
-        </div>
-        <div class="field">
-          <label for="share-expiry">Expires at (optional)</label>
-          <input
-            id="share-expiry"
-            type="datetime-local"
-            bind:value={store.shareExpiry}
-          />
-        </div>
-        {#if store.shareUrlValue}
-          <div class="field">
-            <label for="share-url">Share URL</label>
-            <input id="share-url" value={store.shareUrlValue} readonly />
-          </div>
-          <button
-            type="button"
-            class="btn-primary"
-            onclick={() =>
-              store.copyShareUrl(store.existingShares[0]?.token || "")}
-            >{store.copiedToken ? "Copied!" : "Copy Link"}</button
-          >
-        {:else}
-          <button
-            type="submit"
-            class="btn-primary"
-            disabled={store.creatingShare}
-            >{store.creatingShare ? "Creating..." : "Create Share Link"}</button
-          >
-        {/if}
-        {#if store.createShareError}
-          <p class="error">{store.createShareError}</p>
-        {/if}
-      </form>
-      {#if store.existingShares.length > 0}
-        <hr />
-        <h3>Existing Share Links</h3>
-        <ul class="share-list">
-          {#each store.existingShares as share}
-            <li>
-              <span
-                >{share.file?.originalName ||
-                  share.folder?.name ||
-                  "Unknown"}</span
-              >
-              <span>{share.permissions}</span>
-              {#if share.expiresAt}<span
-                  >Expires {formatDate(share.expiresAt)}</span
-                >{/if}
-              <button
-                class="btn-sm"
-                onclick={() => store.copyShareUrl(share.token)}
-                >{store.copiedToken === share.token
-                  ? "Copied!"
-                  : "Copy"}</button
-              >
-              <button class="btn-sm" onclick={() => store.revokeShare(share.id)}
-                >Revoke</button
-              >
-            </li>
-          {/each}
-        </ul>
-      {/if}
-      <button class="btn-ghost" onclick={store.closeShareDialog}>Close</button>
-    </div>
-  </div>
-{/if}
+<ShareDialog
+  open={!store.isShared && store.shareDialogOpen && !!store.showShareDialog}
+  name={store.showShareDialog?.name ?? ""}
+  type={store.showShareDialog?.type ?? "file"}
+  id={store.showShareDialog?.id ?? ""}
+  onclose={store.closeShareDialog}
+/>
 
 <!-- Confirm Dialog -->
 {#if store.confirmOpen}

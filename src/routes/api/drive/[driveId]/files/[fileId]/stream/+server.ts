@@ -22,8 +22,6 @@ export const GET: RequestHandler = async ({ params, request, url, locals }) => {
     } else if (ctx.share?.folderId) {
       const allowed = await isFileInSharedFolder(params.fileId, ctx.share.folderId);
       if (!allowed) error(403, "File is not in the shared drive");
-    } else {
-      error(400, "Invalid share configuration");
     }
   } else if (record.userId !== ctx.userId) {
     error(404, "File not found");

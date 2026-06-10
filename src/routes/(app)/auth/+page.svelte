@@ -2,6 +2,8 @@
   import { goto } from "$app/navigation";
   import { required, email, minLength, pipe } from "$lib/validators";
   import type { Rule } from "$lib/validators";
+  import Form from "$lib/components/Form.svelte";
+  import Input from "$lib/components/Input.svelte";
 
   let tab = $state("login");
 
@@ -41,8 +43,7 @@
     return e;
   }
 
-  async function handleLogin(e: SubmitEvent) {
-    e.preventDefault();
+  async function handleLogin(_values: unknown, _e: SubmitEvent) {
     const v = validateLogin();
     errors = v;
     if (Object.keys(v).length) return;
@@ -58,8 +59,7 @@
     else { const r = await res.json(); serverError = r.error || "Something went wrong"; }
   }
 
-  async function handleSignup(e: SubmitEvent) {
-    e.preventDefault();
+  async function handleSignup(_values: unknown, _e: SubmitEvent) {
     const v = validateSignup();
     errors = v;
     if (Object.keys(v).length) return;
@@ -96,46 +96,43 @@
       </div>
 
       {#if tab === "login"}
-        <form class="auth-form" onsubmit={handleLogin} novalidate>
+        <Form onSubmit={handleLogin} class="auth-form">
           <div class="field" class:field-error={errors["l-email"]}>
-            <label for="l-email">Email</label>
-            <input id="l-email" type="email" placeholder="you@example.com" bind:value={lEmail} oninput={() => focusField("l-email")} />
+            <Input id="l-email" type="email" placeholder="you@example.com" bind:value={lEmail} oninput={() => focusField("l-email")} label="Email" />
             {#if errors["l-email"]}<span class="field-msg">{errors["l-email"]}</span>{/if}
           </div>
           <div class="field" class:field-error={errors["l-password"]}>
             <label for="l-password">Password</label>
             <div class="password-wrap">
-              <input id="l-password" type={lShowPassword ? "text" : "password"} placeholder="Enter password" bind:value={lPassword} oninput={() => focusField("l-password")} />
+              <Input id="l-password" type={lShowPassword ? "text" : "password"} placeholder="Enter password" bind:value={lPassword} oninput={() => focusField("l-password")} />
               <button type="button" class="password-toggle" onclick={() => lShowPassword = !lShowPassword} aria-label="Toggle password visibility">{lShowPassword ? "Hide" : "Show"}</button>
             </div>
             {#if errors["l-password"]}<span class="field-msg">{errors["l-password"]}</span>{/if}
           </div>
           {#if serverError}<p class="server-error">{serverError}</p>{/if}
           <button type="submit" class="btn-primary" disabled={loading}>{loading ? "Signing in\u2026" : "Sign In"}</button>
-        </form>
+        </Form>
       {:else}
-        <form class="auth-form" onsubmit={handleSignup} novalidate>
+        <Form onSubmit={handleSignup} class="auth-form">
           <div class="field" class:field-error={errors["s-name"]}>
-            <label for="s-name">Full Name</label>
-            <input id="s-name" placeholder="Jane Doe" bind:value={sName} oninput={() => focusField("s-name")} />
+            <Input id="s-name" placeholder="Jane Doe" bind:value={sName} oninput={() => focusField("s-name")} label="Full Name" />
             {#if errors["s-name"]}<span class="field-msg">{errors["s-name"]}</span>{/if}
           </div>
           <div class="field" class:field-error={errors["s-email"]}>
-            <label for="s-email">Email</label>
-            <input id="s-email" type="email" placeholder="you@example.com" bind:value={sEmail} oninput={() => focusField("s-email")} />
+            <Input id="s-email" type="email" placeholder="you@example.com" bind:value={sEmail} oninput={() => focusField("s-email")} label="Email" />
             {#if errors["s-email"]}<span class="field-msg">{errors["s-email"]}</span>{/if}
           </div>
           <div class="field" class:field-error={errors["s-password"]}>
             <label for="s-password">Password</label>
             <div class="password-wrap">
-              <input id="s-password" type={sShowPassword ? "text" : "password"} placeholder="Create a password" bind:value={sPassword} oninput={() => focusField("s-password")} />
+              <Input id="s-password" type={sShowPassword ? "text" : "password"} placeholder="Create a password" bind:value={sPassword} oninput={() => focusField("s-password")} />
               <button type="button" class="password-toggle" onclick={() => sShowPassword = !sShowPassword} aria-label="Toggle password visibility">{sShowPassword ? "Hide" : "Show"}</button>
             </div>
             {#if errors["s-password"]}<span class="field-msg">{errors["s-password"]}</span>{/if}
           </div>
           {#if serverError}<p class="server-error">{serverError}</p>{/if}
           <button type="submit" class="btn-primary" disabled={loading}>{loading ? "Creating account\u2026" : "Create Account"}</button>
-        </form>
+        </Form>
       {/if}
     </div>
   </div>

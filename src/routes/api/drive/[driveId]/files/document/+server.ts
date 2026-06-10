@@ -17,10 +17,6 @@ const typeConfig: Record<string, { ext: string; mime: string; label: string }> =
 export const POST: RequestHandler = async ({ request, locals, params }) => {
   const ctx = await getDriveContext(params.driveId, locals, "insert");
   if (!ctx) return json({ error: "Drive not found or upload not permitted" }, { status: 404 });
-  if (ctx.type === "share" && !ctx.share?.folderId) {
-    return json({ error: "Can only create documents in shared folders" }, { status: 400 });
-  }
-
   const body = await request.json();
   const docType = body.type as string;
   const name = (body.name as string)?.trim();

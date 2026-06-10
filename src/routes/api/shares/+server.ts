@@ -7,9 +7,9 @@ const VALID_PERMISSIONS = ["view", "insert", "edit", "structure"];
 export const POST: RequestHandler = async ({ request, locals }) => {
   if (!locals.user) return json({ error: "Not authenticated" }, { status: 401 });
 
-  const { fileId, folderId, permissions, expiresInHours } = await request.json();
-  if (!fileId && !folderId) {
-    return json({ error: "fileId or folderId is required" }, { status: 400 });
+  const { fileId, folderId, drive, permissions, expiresInHours } = await request.json();
+  if (!fileId && !folderId && !drive) {
+    return json({ error: "fileId, folderId, or drive is required" }, { status: 400 });
   }
 
   const perms = permissions || "view";
@@ -36,6 +36,11 @@ export const POST: RequestHandler = async ({ request, locals }) => {
   const expiresAt = expiresInHours
     ? new Date(Date.now() + expiresInHours * 60 * 60 * 1000)
     : null;
+
+  if (drive) {
+    const share = await createShare({ userId: locals.user.id, permissions: perms, expiresAt });
+    return json({ share }, { status: 201 });
+  }
 
   const share = await createShare({ fileId, folderId, permissions: perms, expiresAt });
   return json({ share }, { status: 201 });

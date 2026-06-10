@@ -32,10 +32,6 @@ export const GET: RequestHandler = async ({ url, locals, params }) => {
 export const POST: RequestHandler = async ({ request, locals, params }) => {
   const ctx = await getDriveContext(params.driveId, locals, "structure");
   if (!ctx) return json({ error: "Drive not found or upload not permitted" }, { status: 404 });
-  if (ctx.type === "share" && !ctx.share?.folderId) {
-    return json({ error: "Can only create folders in shared folders" }, { status: 400 });
-  }
-
   const { name, parentId } = await request.json();
   if (!name || typeof name !== "string" || !name.trim()) {
     return json({ error: "Folder name is required" }, { status: 400 });

@@ -336,7 +336,7 @@ export async function getFileTypeBreakdown(userId: string) {
 export async function getValidShare(token: string, permission?: string) {
   const share = await prisma.share.findUnique({
     where: { token },
-    include: { file: true, folder: { select: { id: true, userId: true, parentId: true } } },
+    include: { file: true, folder: { select: { id: true, userId: true, parentId: true } }, user: { select: { id: true } } },
   });
   if (!share) return null;
   if (share.expiresAt && share.expiresAt < new Date()) return null;
@@ -357,11 +357,17 @@ export async function getDriveContext(
   locals: { user?: { id: string } | null },
   permission?: string,
 ): Promise<DriveContext | null> {
-  // Try as share token
   const share = await getValidShare(driveId, permission);
   if (share) {
-    const uid = share.folder?.userId || share.file?.userId;
+    const uid = share.folder?.userId || share.file?.userId || share.userId;
     if (!uid) return null;
+    if (share.userId) {
+      return {
+        type: "share",
+        userId: uid,
+        share: { folderId: null, fileId: null, permissions: share.permissions },
+      };
+    }
     return {
       type: "share",
       userId: uid,
@@ -369,7 +375,6 @@ export async function getDriveContext(
     };
   }
 
-  // Try as user's personal drive
   if (locals.user && locals.user.id === driveId) {
     return { type: "user", userId: locals.user.id };
   }
@@ -404,16 +409,17 @@ export async function isFolderInSharedFolder(folderId: string, shareFolderId: st
 }
 
 export async function createShare(
-  options: { fileId?: string; folderId?: string; permissions?: string; expiresAt?: Date | null }
+  options: { fileId?: string; folderId?: string; userId?: string; permissions?: string; expiresAt?: Date | null }
 ) {
   return prisma.share.create({
     data: {
       fileId: options.fileId ?? null,
       folderId: options.folderId ?? null,
+      userId: options.userId ?? null,
       permissions: options.permissions ?? "read",
       expiresAt: options.expiresAt ?? null,
     },
-    include: { file: true, folder: true },
+    include: { file: true, folder: true, user: { select: { id: true, name: true } } },
   });
 }
 
@@ -423,6 +429,7 @@ export async function getShare(token: string) {
     include: {
       file: true,
       folder: { include: { files: true, children: true } },
+      user: { select: { id: true, name: true } },
     },
   });
 }
@@ -449,9 +456,17 @@ export async function getUserShares(userId: string) {
       OR: [
         { file: { userId } },
         { folder: { userId } },
+        { userId },
       ],
     },
-    include: { file: true, folder: true },
+    include: { file: true, folder: true, user: { select: { id: true, name: true } } },
+    orderBy: { createdAt: "desc" },
+  });
+}
+
+export async function getDriveShare(userId: string) {
+  return prisma.share.findFirst({
+    where: { userId, fileId: null, folderId: null },
     orderBy: { createdAt: "desc" },
   });
 }

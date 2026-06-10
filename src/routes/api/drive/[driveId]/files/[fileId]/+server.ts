@@ -24,8 +24,6 @@ export const PATCH: RequestHandler = async ({ request, params, locals }) => {
       } else if (ctx.share?.folderId) {
         const allowed = await isFileInSharedFolder(params.fileId, ctx.share.folderId);
         if (!allowed) error(403, "File is not in the shared drive");
-      } else {
-        error(400, "Invalid share configuration");
       }
     }
     await renameFile(params.fileId, body.name);
@@ -65,8 +63,6 @@ export const DELETE: RequestHandler = async ({ params, locals }) => {
     } else if (ctx.share?.folderId) {
       const allowed = await isFileInSharedFolder(params.fileId, ctx.share.folderId);
       if (!allowed) error(403, "File is not in the shared drive");
-    } else {
-      error(400, "Invalid share configuration");
     }
   } else if (file.userId !== ctx.userId) {
     return json({ error: "File not found" }, { status: 404 });

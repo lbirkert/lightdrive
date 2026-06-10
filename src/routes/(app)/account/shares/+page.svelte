@@ -1,4 +1,6 @@
 <script lang="ts">
+  import ShareDialog from "$lib/components/ShareDialog.svelte";
+
   let { data } = $props();
 
   let shares = $state([]);
@@ -12,6 +14,8 @@
   let editingShare = $state<any>(null);
   let editPermissions = $state("");
   let editExpiry = $state("");
+
+  let showShareDialog = $state(false);
 
   let copiedToken = $state<string | null>(null);
 
@@ -50,6 +54,18 @@
 
   function formatDate(d: string | Date) { return new Date(d).toLocaleDateString(); }
 
+  function shareName(share: any) {
+    if (share.file) return share.file.originalName;
+    if (share.folder) return share.folder.name;
+    if (share.user) return "My Drive";
+    return "Unknown";
+  }
+
+  function handleDriveShare(share: any) {
+    shares = [share, ...shares];
+    showShareDialog = false;
+  }
+
   let permissionOptions = [
     { value: "view", label: "View" },
     { value: "view,insert", label: "View & Insert" },
@@ -63,17 +79,20 @@
 
   <a href="/account" class="back-link">&larr; Back to Account</a>
 
+  <button class="btn-primary" onclick={() => showShareDialog = true}>
+    Share Drive
+  </button>
+
   {#if shares.length === 0}
     <div class="card empty-state">
-      <p class="secondary">No share links yet. Go to your Drive to share files and folders.</p>
-      <a href="/drive" class="btn-primary">Go to Drive</a>
+      <p class="secondary">No share links yet.</p>
     </div>
   {:else}
     <ul class="share-list">
       {#each shares as share}
         <li class="card">
           <div class="share-info">
-            <span class="share-name">{share.file?.originalName || share.folder?.name || "Unknown"}</span>
+            <span class="share-name">{shareName(share)}</span>
             <span class="share-perms">{share.permissions}</span>
           </div>
           <div class="share-meta">
@@ -94,6 +113,15 @@
     </ul>
   {/if}
 </div>
+
+<ShareDialog
+  open={showShareDialog}
+  name="My Drive"
+  type="drive"
+  id={data.user?.id ?? ""}
+  onclose={() => showShareDialog = false}
+  onshare={handleDriveShare}
+/>
 
 {#if showRevokeConfirm}
   <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
