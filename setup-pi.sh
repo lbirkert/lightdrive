@@ -67,7 +67,7 @@ if [[ -n "$REPO_DIR" ]]; then
 else
   echo ""
   info "=== Clone Repository ==="
-  prompt_default REPO_DIR "Destination directory" "/home/pi/FlewUi"
+  prompt_default REPO_DIR "Destination directory" "/home/pi/lightdrive"
   if [[ -d "$REPO_DIR" ]]; then
     warn "Directory already exists"
     if confirm "Pull latest changes?"; then
@@ -75,12 +75,12 @@ else
     fi
   else
     mkdir -p "$(dirname "$REPO_DIR")"
-    git clone https://github.com/lbirkert/FlewUi.git "$REPO_DIR"
+    git clone https://github.com/lbirkert/lightdrive.git "$REPO_DIR"
     ok "Repository cloned"
   fi
 fi
 
-LIGHTDRIVE_DIR="$REPO_DIR/examples/lightdrive"
+LIGHTDRIVE_DIR="$REPO_DIR"
 if [[ ! -d "$LIGHTDRIVE_DIR" ]]; then
   err "LightDrive not found at $LIGHTDRIVE_DIR"
   exit 1
@@ -210,19 +210,6 @@ fi
 echo ""
 info "=== Install npm Dependencies ==="
 
-# Build flewui first (it's a local file: dependency)
-FLW_DIR="$REPO_DIR"
-if [[ -d "$FLW_DIR" && ! -f "$FLW_DIR/dist/index.js" ]]; then
-  info "Building flewui component library..."
-  cd "$FLW_DIR"
-  npm install
-  npm run build
-  cd "$LIGHTDRIVE_DIR"
-  ok "flewui built"
-else
-  ok "flewui already built"
-fi
-
 info "Installing LightDrive dependencies..."
 npm install
 ok "Dependencies installed"
@@ -298,7 +285,7 @@ if [[ ! -f "$SERVICE_FILE" ]]; then
   sudo tee "$SERVICE_FILE" > /dev/null <<UNIT
 [Unit]
 Description=LightDrive — Self-hosted file sharing
-Documentation=https://github.com/lbirkert/FlewUi
+Documentation=https://github.com/lbirkert/lightdrive
 After=network.target
 
 [Service]
