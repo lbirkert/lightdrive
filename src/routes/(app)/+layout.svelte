@@ -8,7 +8,7 @@
   import { uploadStore } from "$lib/components/upload-store.svelte";
 
   let { data, children }: { data: { user: { id: string; name: string; email: string } | null }; children: import("svelte").Snippet } = $props();
-  let user = $derived(data.user);
+  let user = $derived($page.data.user);
 
   let userMenuOpen = $state(false);
 
