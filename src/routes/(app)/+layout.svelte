@@ -6,9 +6,10 @@
   import { Folder, BarChart3, LogIn, LogOut, User, Settings, HardDrive, Menu, Share2, Zap } from "@lucide/svelte";
   import UploadFooter from "$lib/components/UploadFooter.svelte";
   import { uploadStore } from "$lib/components/upload-store.svelte";
+  import Avatar from "$lib/components/Avatar.svelte";
   import { getInitials } from "$lib/helpers";
 
-  let { data, children }: { data: { user: { id: string; name: string; email: string } | null }; children: import("svelte").Snippet } = $props();
+  let { data, children }: { data: { user: App.Locals["user"] }; children: import("svelte").Snippet } = $props();
   let user = $derived($page.data.user);
 
   let userMenuOpen = $state(false);
@@ -71,7 +72,7 @@
             onclick={() => userMenuOpen = !userMenuOpen}
             onblur={() => setTimeout(() => userMenuOpen = false, 150)}
           >
-            <span class="avatar avatar:sm">{getInitials(user.name)}</span>
+            <Avatar name={user.name} url={user.avatarUrl} color={user.avatarColor} size="sm" />
             <span class="user-name">{user.name}</span>
           </button>
           {#if userMenuOpen}
@@ -112,7 +113,7 @@
         {#if user}
           <hr />
           <div class="mobile-user-info">
-            <span class="avatar avatar:md">{getInitials(user.name)}</span>
+            <Avatar name={user.name} url={user.avatarUrl} color={user.avatarColor} size="md" />
             <div>
               <span class="user-name">{user.name}</span>
               <span class="mobile-user-email">{user.email}</span>

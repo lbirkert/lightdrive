@@ -244,6 +244,11 @@ info "=== Involved Users Migration ==="
 npx tsx scripts/migrate-involved.ts
 ok "Involved users migrated"
 
+# Assign avatar colors to existing users
+info "=== Avatar Colors Migration ==="
+npx tsx scripts/migrate-avatar-colors.ts
+ok "Avatar colors migrated"
+
 # ── Build the Application ────────────────────
 
 echo ""

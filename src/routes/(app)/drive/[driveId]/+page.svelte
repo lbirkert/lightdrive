@@ -29,6 +29,7 @@
   import FolderTree from "$lib/components/FolderTree.svelte";
   import { DriveStore } from "$lib/components/drive-store.svelte.js";
   import { uploadStore } from "$lib/components/upload-store.svelte.js";
+    import { onMount } from "svelte";
 
   let { data } = $props();
 
@@ -72,6 +73,9 @@
   });
 
   afterNavigate(() => {
+    var scrollText = page.url.searchParams.get("scroll");
+    if(scrollText === null) return;
+    savedScroll = parseInt(scrollText);
     if (savedScroll > 0) {
       const el = document.querySelector<HTMLElement>(".content-area");
       if (el) el.scrollTop = savedScroll;

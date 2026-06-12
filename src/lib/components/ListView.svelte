@@ -4,9 +4,9 @@
     formatFullDate,
     getPreviewUrl,
     isVideoType,
-    getInitials,
   } from "../helpers";
   import { Folder, FileText, HardDrive } from "@lucide/svelte";
+  import Avatar from "./Avatar.svelte";
 
   let failedImages = $state<Set<string>>(new Set());
   function imgError(fileId: string) {
@@ -151,8 +151,10 @@
         <span class="col-size">{formatSize(folderSizes[f.id] ?? 0)}</span>
         <span class="col-date">{formatFullDate(f.createdAt)}</span>
         <span class="col-involved">
-          {#each f.involved as p}
-            <span class="involved-avatar" title={p.id === user?.id ? "You" : p.name}>{getInitials(p.name)}</span>
+          {#each f.involved ?? [] as p}
+            <span class="involved-avatar" title={p.id === user?.id ? "You" : p.name}>
+              <Avatar name={p.name} url={p.avatarUrl} color={p.avatarColor} size="sm" />
+            </span>
           {/each}
         </span>
       </div>
@@ -191,8 +193,10 @@
         <span class="col-size">{formatSize(f.size)}</span>
         <span class="col-date">{formatFullDate(f.uploadedAt)}</span>
         <span class="col-involved">
-          {#each (f.involved?.length ? f.involved : (f.user ? [f.user] : [])) as p}
-            <span class="involved-avatar" title={p.id === user?.id ? "You" : p.name}>{getInitials(p.name)}</span>
+          {#each f.involved ?? [] as p}
+            <span class="involved-avatar" title={p.id === user?.id ? "You" : p.name}>
+              <Avatar name={p.name} url={p.avatarUrl} color={p.avatarColor} size="sm" />
+            </span>
           {/each}
         </span>
       </div>

@@ -72,6 +72,14 @@ else
   npx tsx scripts/migrate-involved.ts
 fi
 
+# 7. Assign avatar colors to existing users
+echo "==> Migrating avatar colors..."
+if [ "$RUNTIME" = "bun" ]; then
+  bun run scripts/migrate-avatar-colors.ts
+else
+  npx tsx scripts/migrate-avatar-colors.ts
+fi
+
 echo ""
 echo "==> Setup complete!"
     echo "    Run: $RUNTIME run dev"

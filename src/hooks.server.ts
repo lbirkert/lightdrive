@@ -6,7 +6,7 @@ export const handle: Handle = async ({ event, resolve }) => {
   const token = event.cookies.get("session");
   if (token) {
     const user = await getSessionUser(token);
-    if (user) event.locals.user = { id: user.id, name: user.name, email: user.email };
+    if (user) event.locals.user = { id: user.id, name: user.name, email: user.email, avatarUrl: user.avatarUrl, avatarColor: user.avatarColor };
   }
   return resolve(event);
 };

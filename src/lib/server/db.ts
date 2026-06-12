@@ -1,5 +1,6 @@
 import { hash, verify } from "argon2";
 import { randomBytes } from "node:crypto";
+import { getRandomAvatarColor } from "../avatar";
 import prisma from "./prisma";
 
 export { prisma };
@@ -19,7 +20,7 @@ export async function verifyPassword(hashStr: string, password: string): Promise
 export async function createUser(name: string, email: string, password: string) {
   const passwordHash = await hashPassword(password);
   return prisma.user.create({
-    data: { name, email, passwordHash },
+    data: { name, email, passwordHash, avatarColor: getRandomAvatarColor() },
   });
 }
 
@@ -96,9 +97,9 @@ export async function getFiles(userId: string, folderId?: string | null) {
   const files = await prisma.file.findMany({
     where: { userId, folderId: folderId ?? null },
     include: {
-      user: { select: { id: true, name: true } },
+      user: { select: { id: true, name: true, avatarColor: true, avatarUrl: true } },
       involvements: {
-        include: { user: { select: { id: true, name: true } } },
+        include: { user: { select: { id: true, name: true, avatarColor: true, avatarUrl: true } } },
       },
     },
     orderBy: { uploadedAt: "desc" },

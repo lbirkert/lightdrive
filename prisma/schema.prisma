@@ -12,6 +12,8 @@ model User {
   name         String
   email        String    @unique
   passwordHash String
+  avatarUrl    String?
+  avatarColor  String?
   createdAt    DateTime  @default(now())
   files        File[]
   folders      Folder[]
