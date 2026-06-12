@@ -48,9 +48,9 @@
       <p class="text-secondary">Loading API documentation...</p>
     </div>
   {:else if error}
-    <div class="api-docs-status">
-      <p class="text-error">{error}</p>
-      <p class="text-secondary text-sm">Try refreshing the page or check your internet connection.</p>
+    <div class="mk-api-docs-status">
+      <p class="mk-text-error">{error}</p>
+      <p class="mk-text-secondary mk-text-sm">Try refreshing the page or check your internet connection.</p>
     </div>
   {/if}
 </div>

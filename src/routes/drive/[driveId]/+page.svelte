@@ -33,6 +33,26 @@
 
   let { data } = $props();
 
+  let shareTitle = $derived(
+    data.isShared
+      ? data.shareInfo?.type === "file"
+        ? `${data.shareInfo.file.name} - LightDrive`
+        : data.shareInfo?.name
+          ? `${data.shareInfo.name} - LightDrive`
+          : "LightDrive"
+      : "LightDrive"
+  );
+  let shareDesc = $derived(
+    data.isShared
+      ? data.shareInfo?.type === "file"
+        ? `Shared file: ${data.shareInfo.file.name} (${data.shareInfo.file.type})`
+        : data.shareInfo?.name
+          ? `Shared: ${data.shareInfo.name}`
+          : ""
+      : ""
+  );
+
+
   // svelte-ignore state_referenced_locally
   const store = new DriveStore(data, { goto, invalidate }, page.url);
 
@@ -83,6 +103,18 @@
     }
   });
 </script>
+
+<svelte:head>
+  {#if data.isShared}
+    <title>{shareTitle}</title>
+    <meta property="og:title" content={shareTitle} />
+    <meta name="description" content={shareDesc} />
+    <meta property="og:description" content={shareDesc} />
+    {#if data.shareInfo?.type === "file" && data.shareInfo?.file?.type?.startsWith("image/")}
+      <meta property="og:image" content="{page.url.origin}/api/drive/{data.driveId}/files/{data.shareInfo.file.id}/preview" />
+    {/if}
+  {/if}
+</svelte:head>
 
 <div class="drive-container">
   {#if !store.isShared && !store.data.user}

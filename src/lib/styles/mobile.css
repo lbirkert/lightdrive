@@ -1,6 +1,8 @@
 .burger-label {
   display: none;
   cursor: pointer;
+  align-items: center !important;
+  margin: 0 !important;
 }
 
 .mobile-menu-checkbox {
@@ -210,6 +212,16 @@
     margin-right: 4px;
   }
 
+  .theme-toggle svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .theme-toggle {
+    padding: 8px;
+    margin-right: 8px;
+  }
+
   .breadcrumb-desktop {
     display: none !important;
   }
@@ -217,9 +229,19 @@
   .breadcrumb-mobile {
     display: flex !important;
   }
-}
 
-@media (max-width: 768px) {
+  .desktop-nav {
+    display: none !important;
+  }
+
+  .desktop-user {
+    display: none !important;
+  }
+
+  .burger-label {
+    display: inline-flex;
+  }
+  
   .page {
     padding: var(--flew-spacing-4);
   }
