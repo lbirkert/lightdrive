@@ -51,7 +51,7 @@
     if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
   }
 
-  function handleClick(e: MouseEvent, id: string, isFolder: boolean) {
+  function handleClick(e: { ctrlKey: boolean, metaKey: boolean }, id: string, isFolder: boolean) {
     if (longPressFired) { longPressFired = false; return; }
     if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
     if (e.ctrlKey || e.metaKey) { ontoggleselection?.(id); }

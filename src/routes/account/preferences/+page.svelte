@@ -1,5 +1,9 @@
 <script lang="ts">
   import { mode, setMode } from "mode-watcher";
+
+  function parseMode(mode: string): "light" | "dark" | "system" {
+    return (mode == "light" || mode == "dark" || mode == "system") ? mode : "system";
+  }
 </script>
 
 <div class="page page:sm">
@@ -19,7 +23,7 @@
       <select
         id="theme-select"
         value={mode.current}
-        onchange={(e) => setMode((e.target as HTMLSelectElement).value)}
+        onchange={(e) => setMode(parseMode((e.target as HTMLSelectElement).value))}
       >
         <option value="light">Light</option>
         <option value="dark">Dark</option>

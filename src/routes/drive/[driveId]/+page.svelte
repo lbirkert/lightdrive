@@ -259,7 +259,6 @@
           id="drive-file-input"
           type="file"
           multiple
-          accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,.csv,.md,.mp3,.wav,.flac,.ogg,.aac,.m4a,.wma,.opus,.webm"
           onchange={(e) => {
             (e.currentTarget as HTMLInputElement).form?.requestSubmit();
           }}
