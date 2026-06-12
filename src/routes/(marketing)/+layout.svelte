@@ -33,6 +33,9 @@
           <a href="/api-docs" class="mk-nav-link" class:mk-active={$page.url.pathname.startsWith("/api-docs")}>
             API Docs
           </a>
+          <a href="/drive" class="mk-nav-link mk-app-link">
+            Go to App
+          </a>
           <button class="mk-nav-link mk-theme-toggle" onclick={toggleTheme} aria-label="Toggle theme">
             {#if isDark}
               <Sun size={14} />
@@ -40,14 +43,11 @@
               <Moon size={14} />
             {/if}
           </button>
-          <a href="/drive" class="mk-nav-link mk-app-link">
-            Go to App
-          </a>
         </nav>
       </div>
     </header>
   {/if}
-  <div class="mk-root-content" style="margin-top: 53px;">
+  <div class="mk-root-content">
     {@render children()}
   </div>
 </div>

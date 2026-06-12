@@ -28,7 +28,7 @@
     <div class="mk-hero-content">
       <div class="mk-hero-icon"><Zap size={56} /></div>
       <h1 class="mk-hero-title">LightDrive</h1>
-      <p class="mk-hero-subtitle">Your personal cloud storage — fast, private, and self-hosted.</p>
+      <p class="mk-hero-subtitle" style="margin-bottom: 40px">Your personal cloud storage — fast, private, and self-hosted.</p>
       <div class="mk-hero-actions">
         <a href="/auth" class="mk-btn mk-btn-primary mk-btn-lg">Sign Up <ArrowRight size={16} /></a>
         <a href="/drive" class="mk-btn mk-btn-ghost mk-btn-lg">Go to Drive</a>
