@@ -4,6 +4,7 @@
     formatFullDate,
     getPreviewUrl,
     isVideoType,
+    getInitials,
   } from "../helpers";
   import { Folder, FileText, HardDrive } from "@lucide/svelte";
 
@@ -29,6 +30,7 @@
     ontoggleselection?: (id: string) => void;
     emptyMessage?: string;
     useDriveIcon?: boolean;
+    user?: { id: string; name: string } | null;
   };
 
   let {
@@ -39,6 +41,7 @@
     selectedIds,
     sortMode = "date-desc",
     useDriveIcon = false,
+    user = null,
     updateSort,
     sortIndicator,
     onnavigate,
@@ -121,7 +124,7 @@
             ? " ↓"
             : ""}
       </button>
-      <span class="col-header col-owner">Owner</span>
+      <span class="col-header col-involved">Involved</span>
     </div>
     {#each folders as f}
       <div
@@ -147,7 +150,11 @@
         </span>
         <span class="col-size">{formatSize(folderSizes[f.id] ?? 0)}</span>
         <span class="col-date">{formatFullDate(f.createdAt)}</span>
-        <span class="col-owner">You</span>
+        <span class="col-involved">
+          {#each f.involved as p}
+            <span class="involved-avatar" title={p.id === user?.id ? "You" : p.name}>{getInitials(p.name)}</span>
+          {/each}
+        </span>
       </div>
     {/each}
     {#each files as f}
@@ -183,7 +190,11 @@
         </span>
         <span class="col-size">{formatSize(f.size)}</span>
         <span class="col-date">{formatFullDate(f.uploadedAt)}</span>
-        <span class="col-owner">You</span>
+        <span class="col-involved">
+          {#each (f.involved?.length ? f.involved : (f.user ? [f.user] : [])) as p}
+            <span class="involved-avatar" title={p.id === user?.id ? "You" : p.name}>{getInitials(p.name)}</span>
+          {/each}
+        </span>
       </div>
     {/each}
   </div>

@@ -121,14 +121,15 @@
 </script>
 
 <div class="page page:sm shares-page">
-  <h1>Sharing</h1>
-
   <a href="/account" class="back-link">&larr; Back to Account</a>
+  
+  <h1>Sharing</h1>
 
   {#if message}
     <p class="success">{message}</p>
   {/if}
 
+  <!-- TODO: deprecate this -->
   <button class="btn-primary" onclick={() => showShareDialog = true}>
     Share Drive
   </button>

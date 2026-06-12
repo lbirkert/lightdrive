@@ -301,6 +301,7 @@
               onnavigate={store.navigateTo}
               onopenfilepreview={store.openFilePreview}
               ontoggleselection={store.toggleSelection}
+              user={data.user}
             />
           {/if}
         {/if}

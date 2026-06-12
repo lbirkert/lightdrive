@@ -64,7 +64,15 @@ else
   npx prisma db push --accept-data-loss
 fi
 
+# 6. Backfill involved users for existing files
+echo "==> Migrating involved users..."
+if [ "$RUNTIME" = "bun" ]; then
+  bun run scripts/migrate-involved.ts
+else
+  npx tsx scripts/migrate-involved.ts
+fi
+
 echo ""
 echo "==> Setup complete!"
-echo "    Run: $RUNTIME run dev"
-echo "    Open: http://localhost:5173"
+    echo "    Run: $RUNTIME run dev"
+    echo "    Open: http://localhost:5173"

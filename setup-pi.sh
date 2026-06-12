@@ -239,6 +239,11 @@ else
 fi
 ok "Database schema applied"
 
+# Backfill involved users for existing files
+info "=== Involved Users Migration ==="
+npx tsx scripts/migrate-involved.ts
+ok "Involved users migrated"
+
 # ── Build the Application ────────────────────
 
 echo ""

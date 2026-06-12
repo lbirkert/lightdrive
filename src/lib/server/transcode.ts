@@ -44,20 +44,19 @@ export async function transcodeVideo(storedName: string): Promise<string | null>
   const transcodedDir = join(UPLOAD_DIR, "transcoded");
   await mkdir(transcodedDir, { recursive: true });
 
-  const outputName = `${storedName}.webm`;
+  const outputName = `${storedName}.mp4`;
   const output = join(transcodedDir, outputName);
 
   const args = [
     "-i", input,
-    "-c:v", "libvpx-vp9",
-    "-crf", "50",
-    "-b:v", "0",
-    "-cpu-used", "0",
-    "-deadline", "good",
-    "-row-mt", "1",
-    "-vf", "scale=640:360:force_original_aspect_ratio=decrease",
-    "-c:a", "libopus",
+    "-c:v", "libx264",
+    "-preset", "veryfast",
+    "-crf", "28",
+    "-tune", "fastdecode",
+    "-vf", "scale=640:360:force_original_aspect_ratio=decrease,pad=ceil(iw/2)*2:ceil(ih/2)*2:-1:-1",
+    "-c:a", "aac",
     "-b:a", "32k",
+    "-movflags", "+faststart",
     "-y", output,
   ];
 
@@ -73,7 +72,7 @@ export async function transcodeVideo(storedName: string): Promise<string | null>
 }
 
 export function getTranscodedPath(storedName: string, quality?: string): string {
-  return join("transcoded", `${storedName}.webm`);
+  return join("transcoded", `${storedName}.mp4`);
 }
 
 export async function transcodeAudio(storedName: string): Promise<string | null> {
@@ -121,7 +120,7 @@ export async function generateVideoThumbnail(storedName: string): Promise<boolea
 
 export function simplifyMimeForDisplay(mime: string): string {
   if (mime.startsWith("video/")) {
-    return "video/webm";
+    return "video/mp4";
   }
   if (mime.startsWith("audio/")) {
     return "audio/mp4";

@@ -81,9 +81,15 @@
   </div>
 
   <div class="card">
+    <h3>Preferences</h3>
+    <p class="secondary">Update how lightdrive looks, feels and works for you.</p>
+    <a href="/account/preferences" class="btn-ghost">Manage Preferences</a>
+  </div>
+  
+  <div class="card">
     <h3>Sharing</h3>
     <p class="secondary">Manage your share links and view drives shared with you.</p>
-    <a href="/account/shares" class="btn-primary">Manage Sharing</a>
+    <a href="/account/shares" class="btn-ghost">Manage Sharing</a>
   </div>
 </div>
 

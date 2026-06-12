@@ -19,6 +19,7 @@ model User {
   shares       Share[]
   sentInvitations     ShareInvitation[] @relation("SentInvitations")
   receivedInvitations ShareInvitation[] @relation("ReceivedInvitations")
+  involvements FileInvolvement[]
 }
 
 model Session {
@@ -58,6 +59,17 @@ model File {
   uploadedAt     DateTime @default(now())
   transcodedName String?
   shares       Share[]
+  involvements FileInvolvement[]
+}
+
+model FileInvolvement {
+  id     String @id @default(cuid())
+  fileId String
+  file   File   @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([fileId, userId])
 }
 
 model Share {

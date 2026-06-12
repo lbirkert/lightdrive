@@ -45,6 +45,10 @@ export function getPreviewUrl(fileId: string, driveId?: string) {
   return `/api/files/${fileId}/preview`;
 }
 
+export function getInitials(name: string) {
+  return name.split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2);
+}
+
 export function getFileIconClass(type: string, originalName: string) {
   if (isImageType(type) || type.startsWith("image/")) return "image";
   if (isVideoType(type, originalName)) return "video";

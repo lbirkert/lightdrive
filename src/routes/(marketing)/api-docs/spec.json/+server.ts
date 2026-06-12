@@ -604,6 +604,15 @@ const spec = {
           userId: { type: "string" },
           parentId: { type: "string", nullable: true },
           createdAt: { type: "string", format: "date-time" },
+          user: {
+            type: "object",
+            nullable: true,
+            properties: {
+              id: { type: "string" },
+              name: { type: "string" },
+            },
+            description: "The user who created this folder",
+          },
         },
       },
       File: {
@@ -619,6 +628,26 @@ const spec = {
           hasPreview: { type: "boolean", description: "Whether a WebP preview thumbnail is available" },
           downloads: { type: "integer", description: "Download count" },
           uploadedAt: { type: "string", format: "date-time" },
+          user: {
+            type: "object",
+            nullable: true,
+            properties: {
+              id: { type: "string" },
+              name: { type: "string" },
+            },
+            description: "The user who owns this file",
+          },
+          involved: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                id: { type: "string" },
+                name: { type: "string" },
+              },
+            },
+            description: "Users who have uploaded or edited this file (sorted chronologically)",
+          },
         },
       },
       Share: {

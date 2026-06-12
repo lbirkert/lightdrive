@@ -2,7 +2,7 @@ import { json } from "@sveltejs/kit";
 import { writeFile, mkdir } from "node:fs/promises";
 import { join } from "node:path";
 import { randomBytes } from "node:crypto";
-import { addFile, getDriveContext, isFolderInSharedFolder } from "$lib/server/db";
+import { addFile, addFileInvolvement, getDriveContext, isFolderInSharedFolder } from "$lib/server/db";
 import { generateDocumentPreview } from "$lib/server/preview";
 import type { RequestHandler } from "./$types";
 
@@ -58,7 +58,9 @@ export const POST: RequestHandler = async ({ request, locals, params }) => {
   await writeFile(storedPath, buffer);
   const hasPreview = await generateDocumentPreview(storedName, fullName, config.mime);
   const resolvedFolderId = ctx.type === "share" && ctx.share?.folderId ? (folderId || ctx.share.folderId) : folderId;
+  const effectiveUserId = ctx.type === "share" ? (locals.user?.id ?? ctx.userId) : ctx.userId;
   const record = await addFile(ctx.userId, storedName, fullName, buffer.length, config.mime, resolvedFolderId, hasPreview);
+  addFileInvolvement(record.id, effectiveUserId);
 
   return json({
     file: {

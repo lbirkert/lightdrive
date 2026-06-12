@@ -6,15 +6,12 @@
   import { Folder, BarChart3, LogIn, LogOut, User, Settings, HardDrive, Menu, Share2, Zap } from "@lucide/svelte";
   import UploadFooter from "$lib/components/UploadFooter.svelte";
   import { uploadStore } from "$lib/components/upload-store.svelte";
+  import { getInitials } from "$lib/helpers";
 
   let { data, children }: { data: { user: { id: string; name: string; email: string } | null }; children: import("svelte").Snippet } = $props();
   let user = $derived($page.data.user);
 
   let userMenuOpen = $state(false);
-
-  function getInitials(name: string) {
-    return name.split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2);
-  }
 
   async function logout() {
     await fetch("/api/auth/logout", { method: "POST" });

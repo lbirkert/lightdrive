@@ -1,7 +1,7 @@
 import { json, error } from "@sveltejs/kit";
 import { readFile, writeFile, stat } from "node:fs/promises";
 import { join } from "node:path";
-import { getFile, updateFileSize, getDriveContext, isFileInSharedFolder } from "$lib/server/db";
+import { getFile, updateFileSize, addFileInvolvement, getDriveContext, isFileInSharedFolder } from "$lib/server/db";
 import { getDocumentCategory } from "$lib/server/preview";
 import type { RequestHandler } from "./$types";
 
@@ -92,6 +92,7 @@ export const PUT: RequestHandler = async ({ params, request, locals }) => {
     error(404, "Not found");
   }
 
+  const effectiveUserId = ctx.type === "share" ? (locals.user?.id ?? ctx.userId) : ctx.userId;
   const cat = getDocumentCategory(file.type, file.originalName);
   const { content } = await request.json();
   const filePath = join(UPLOAD_DIR, file.storedName);
@@ -100,6 +101,7 @@ export const PUT: RequestHandler = async ({ params, request, locals }) => {
     await writeFile(filePath, content, "utf-8");
     const { size } = await stat(filePath);
     await updateFileSize(file.id, size);
+    addFileInvolvement(file.id, effectiveUserId);
     return json({ saved: true });
   }
 
@@ -116,6 +118,7 @@ export const PUT: RequestHandler = async ({ params, request, locals }) => {
       await writeFile(filePath, buf);
       const { size } = await stat(filePath);
       await updateFileSize(file.id, size);
+      addFileInvolvement(file.id, effectiveUserId);
       return json({ saved: true });
     } catch (e: any) {
       return json({ error: e.message }, { status: 500 });

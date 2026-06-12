@@ -63,7 +63,7 @@ export const GET: RequestHandler = async ({ params, request, url, locals }) => {
         headers: {
           "Content-Range": `bytes ${start}-${end}/${fileSize}`,
           "Accept-Ranges": "bytes",
-          "Content-Type": "video/webm",
+          "Content-Type": "video/mp4",
           "Content-Length": String(chunkSize),
         },
       });
@@ -72,7 +72,7 @@ export const GET: RequestHandler = async ({ params, request, url, locals }) => {
     const buffer = await readFile(filePath);
     return new Response(buffer, {
       headers: {
-        "Content-Type": "video/webm",
+        "Content-Type": "video/mp4",
         "Content-Length": String(buffer.length),
         "Accept-Ranges": "bytes",
       },
@@ -94,7 +94,7 @@ export const GET: RequestHandler = async ({ params, request, url, locals }) => {
 
   if (!ok) error(404, "File not found on disk");
 
-  record.transcodedName = `${record.storedName}.webm`;
+  record.transcodedName = `${record.storedName}.mp4`;
 
   response = await tryServe();
   if (!response) error(404, "File not found on disk");

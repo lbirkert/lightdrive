@@ -2,7 +2,7 @@ import { json } from "@sveltejs/kit";
 import { writeFile, appendFile, rename, mkdir, stat, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { randomBytes, createHash } from "node:crypto";
-import { addFile, findDuplicateFile, getFiles, isImage, isVideo, isAudio, getDriveContext, isFolderInSharedFolder } from "$lib/server/db";
+import { addFile, addFileInvolvement, findDuplicateFile, getFiles, isImage, isVideo, isAudio, getDriveContext, isFolderInSharedFolder } from "$lib/server/db";
 import { generateDocumentPreview, isDocumentType } from "$lib/server/preview";
 import { transcodeAudio, generateVideoThumbnail } from "$lib/server/transcode";
 import { worker } from "$lib/server/transcode-worker";
@@ -39,6 +39,7 @@ export const POST: RequestHandler = async ({ request, locals, params, url }) => 
   const chunkIndex = formData.get("chunkIndex") as string | null;
   const totalChunks = formData.get("totalChunks") as string | null;
 
+  const effectiveUserId = ctx.type === "share" ? (locals.user?.id ?? ctx.userId) : ctx.userId;
   const resolvedFolderId = ctx.type === "share" && ctx.share?.folderId ? (folderId || ctx.share.folderId) : folderId;
 
   // Chunked upload
@@ -86,6 +87,7 @@ export const POST: RequestHandler = async ({ request, locals, params, url }) => 
       } else if (vid) {
         hasPreview = await generateVideoThumbnail(stored);
         const record = await addFile(ctx.userId, stored, originalName, size, fileType, resolvedFolderId, hasPreview, null, contentHash);
+        addFileInvolvement(record.id, effectiveUserId);
         worker.enqueue(record.id, stored);
         return { id: record.id, originalName: record.originalName, size: record.size, type: record.type, hasPreview };
       } else if (aud) {
@@ -94,11 +96,13 @@ export const POST: RequestHandler = async ({ request, locals, params, url }) => 
           hasPreview = await generateDocumentPreview(stored, originalName, fileType);
         }
         const record = await addFile(ctx.userId, stored, originalName, size, fileType, resolvedFolderId, hasPreview, transcodedName, contentHash);
+        addFileInvolvement(record.id, effectiveUserId);
         return { id: record.id, originalName: record.originalName, size: record.size, type: record.type, hasPreview };
       } else if (isDocumentType(fileType, originalName)) {
         hasPreview = await generateDocumentPreview(stored, originalName, fileType);
       }
       const record = await addFile(ctx.userId, stored, originalName, size, fileType, resolvedFolderId, hasPreview, null, contentHash);
+      addFileInvolvement(record.id, effectiveUserId);
       return { id: record.id, originalName: record.originalName, size: record.size, type: record.type, hasPreview };
     }
 
@@ -188,6 +192,7 @@ export const POST: RequestHandler = async ({ request, locals, params, url }) => 
     } else if (vid) {
       hasPreview = await generateVideoThumbnail(storedName);
       const record = await addFile(ctx.userId, storedName, file.name, file.size, file.type, resolvedFolderId, hasPreview, null, contentHash);
+      addFileInvolvement(record.id, effectiveUserId);
       worker.enqueue(record.id, storedName);
       files.push({ id: record.id, originalName: record.originalName, size: record.size, type: record.type, hasPreview });
       continue;
@@ -197,6 +202,7 @@ export const POST: RequestHandler = async ({ request, locals, params, url }) => 
         hasPreview = await generateDocumentPreview(storedName, file.name, file.type);
       }
       const record = await addFile(ctx.userId, storedName, file.name, file.size, file.type, resolvedFolderId, hasPreview, transcodedName, contentHash);
+      addFileInvolvement(record.id, effectiveUserId);
       files.push({ id: record.id, originalName: record.originalName, size: record.size, type: record.type, hasPreview });
       continue;
     } else if (isDocumentType(file.type, file.name)) {
@@ -204,6 +210,7 @@ export const POST: RequestHandler = async ({ request, locals, params, url }) => 
     }
 
     const record = await addFile(ctx.userId, storedName, file.name, file.size, file.type, resolvedFolderId, hasPreview, null, contentHash);
+    addFileInvolvement(record.id, effectiveUserId);
     files.push({ id: record.id, originalName: record.originalName, size: record.size, type: record.type, hasPreview });
   }
 

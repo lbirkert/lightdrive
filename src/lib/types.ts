@@ -27,6 +27,8 @@ export interface FileItem {
   uploadedAt: string | Date;
   hasPreview: boolean;
   name?: string;
+  user?: { id: string; name: string };
+  involved?: { id: string; name: string }[];
 }
 
 export interface FolderItem {
@@ -34,6 +36,7 @@ export interface FolderItem {
   name: string;
   parentId: string | null;
   createdAt?: string | Date;
+  user?: { id: string; name: string };
 }
 
 export interface BreadcrumbItem {

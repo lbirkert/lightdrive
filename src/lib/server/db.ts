@@ -58,6 +58,7 @@ export async function deleteSession(token: string) {
 export async function getRootFolders(userId: string) {
   return prisma.folder.findMany({
     where: { userId, parentId: null },
+    include: { user: { select: { id: true, name: true } } },
     orderBy: { name: "asc" },
   });
 }
@@ -65,6 +66,7 @@ export async function getRootFolders(userId: string) {
 export async function getSubFolders(parentId: string) {
   return prisma.folder.findMany({
     where: { parentId },
+    include: { user: { select: { id: true, name: true } } },
     orderBy: { name: "asc" },
   });
 }
@@ -91,10 +93,20 @@ export async function deleteFolder(id: string) {
 }
 
 export async function getFiles(userId: string, folderId?: string | null) {
-  return prisma.file.findMany({
+  const files = await prisma.file.findMany({
     where: { userId, folderId: folderId ?? null },
+    include: {
+      user: { select: { id: true, name: true } },
+      involvements: {
+        include: { user: { select: { id: true, name: true } } },
+      },
+    },
     orderBy: { uploadedAt: "desc" },
   });
+  return files.map(({ involvements, ...rest }) => ({
+    ...rest,
+    involved: involvements.map(i => i.user),
+  }));
 }
 
 export const IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/gif", "image/webp", "image/bmp", "image/svg+xml", "image/avif"]);
@@ -137,6 +149,12 @@ export async function addFile(
   return prisma.file.create({
     data: { storedName, originalName, contentHash, size, type, userId, folderId: folderId ?? null, hasPreview, transcodedName: transcodedName ?? null },
   });
+}
+
+export async function addFileInvolvement(fileId: string, userId: string) {
+  await prisma.fileInvolvement.create({
+    data: { fileId, userId },
+  }).catch(() => { /* unique constraint = already involved */ });
 }
 
 export async function findDuplicateFile(userId: string, originalName: string, contentHash: string, folderId?: string | null) {

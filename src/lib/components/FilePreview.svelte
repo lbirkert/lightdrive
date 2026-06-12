@@ -104,7 +104,7 @@
         <div class="preview-video">
           {#key filePreviewId}
             <video controls autoplay class="video-player" poster={previewFile.hasPreview ? getPreviewUrl(previewFile.id, driveId) : undefined}>
-              <source src="/api/drive/{driveId}/files/{previewFile.id}/stream" type="video/webm" />
+              <source src="/api/drive/{driveId}/files/{previewFile.id}/stream" type="video/mp4" />
             </video>
           {/key}
         </div>

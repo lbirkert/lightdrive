@@ -56,7 +56,7 @@
 
   .list-row .col-size,
   .list-row .col-date,
-  .list-row .col-owner {
+  .list-row .col-involved {
     display: none;
   }
 
