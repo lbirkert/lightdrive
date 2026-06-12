@@ -1,7 +1,7 @@
 <script lang="ts">
   import { page } from "$app/stores";
   import { ModeWatcher, mode, setMode } from "mode-watcher";
-  import "$lib/styles/styles.css";
+  import "$lib/styles/mobile.css";
   import { goto } from "$app/navigation";
   import {
     Folder,
@@ -179,7 +179,6 @@
 
     <div class="app-content">
       <div class="mobile-overlay">
-        <label class="mobile-overlay-close" for="mobile-menu-toggle"></label>
         <nav class="mobile-menu">
           <ul>
             {#each links as { href, label, icon: Icon }}
@@ -187,6 +186,7 @@
                 <a
                   {href}
                   class="nav-link"
+                  class:active={$page.url.pathname.startsWith(href)}
                   onclick={() => {
                     const cb = document.getElementById(
                       "mobile-menu-toggle",
@@ -219,6 +219,7 @@
                 <a
                   href="/account"
                   class="nav-link"
+                  class:active={$page.url.pathname === "/account"}
                   onclick={() => {
                     const cb = document.getElementById(
                       "mobile-menu-toggle",
@@ -231,6 +232,7 @@
                 <a
                   href="/account/preferences"
                   class="nav-link"
+                  class:active={$page.url.pathname === "/account/preferences"}
                   onclick={() => {
                     const cb = document.getElementById(
                       "mobile-menu-toggle",
@@ -243,6 +245,7 @@
                 <a
                   href="/account/shares"
                   class="nav-link"
+                  class:active={$page.url.pathname === "/account/shares"}
                   onclick={() => {
                     const cb = document.getElementById(
                       "mobile-menu-toggle",
@@ -271,6 +274,7 @@
                 <a
                   href="/auth"
                   class="nav-link"
+                  class:active={$page.url.pathname === "/auth"}
                   onclick={() => {
                     const cb = document.getElementById(
                       "mobile-menu-toggle",
@@ -281,6 +285,14 @@
               </li>
             </ul>
           {/if}
+          <hr />
+          <ul>
+            <li>
+              <button class="nav-link" onclick={() => { toggleTheme(); const cb = document.getElementById("mobile-menu-toggle") as HTMLInputElement; if (cb) cb.checked = false; }}>
+                {#if isDark}<Sun size={18} /> Light Mode{:else}<Moon size={18} /> Dark Mode{/if}
+              </button>
+            </li>
+          </ul>
         </nav>
       </div>
       <main class="app-main">

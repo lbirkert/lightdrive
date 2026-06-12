@@ -466,6 +466,7 @@ body {
 .mk-burger-label {
   display: none;
   cursor: pointer;
+  margin-bottom: 0;
   align-items: center;
   padding: 8px;
   color: var(--mk-text-secondary);
@@ -488,19 +489,15 @@ body {
   position: fixed;
   inset: 0;
   z-index: 200;
-  top: 66px;
+  top: 62px;
   flex-direction: column;
   background-color: rgba(0, 0, 0, 0.4);
+  height: calc(100vdh - 62px);
+  overflow-y: scroll;
 }
 
 #mk-mobile-menu-toggle:checked ~ .mk-mobile-overlay {
   display: flex;
-}
-
-.mk-mobile-overlay-close {
-  position: absolute;
-  inset: 0;
-  cursor: default;
 }
 
 .mk-mobile-menu {

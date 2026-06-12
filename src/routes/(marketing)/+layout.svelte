@@ -52,7 +52,6 @@
     </header>
 
     <div class="mk-mobile-overlay">
-      <label class="mk-mobile-overlay-close" for="mk-mobile-menu-toggle"></label>
       <nav class="mk-mobile-menu">
         <ul>
           <li>

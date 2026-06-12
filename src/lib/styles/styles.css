@@ -1,5 +1,4 @@
 @import './base.css';
-@import './mobile.css';
 
 .app-shell {
   display: flex;

@@ -1,8 +1,11 @@
+@import './styles.css';
+
 .burger-label {
   display: none;
   cursor: pointer;
   align-items: center !important;
   margin: 0 !important;
+  padding: 8px;
 }
 
 .mobile-menu-checkbox {
@@ -15,21 +18,18 @@
 
 .mobile-overlay {
   display: none;
-  position: absolute;
+  position: fixed;
   inset: 0;
   z-index: 50;
   flex-direction: column;
   background-color: rgba(0, 0, 0, 0.4);
+  height: calc(100vdh - 62px);
+  top: 62px;
+  overflow-y: scroll;
 }
 
 #mobile-menu-toggle:checked ~ .app-shell .mobile-overlay {
   display: flex;
-}
-
-.mobile-overlay-close {
-  position: absolute;
-  inset: 0;
-  cursor: default;
 }
 
 .mobile-menu {
@@ -68,6 +68,25 @@
   width: 100%;
   font-size: var(--flew-font-size-lg);
   transition: background-color 0.15s;
+  border: none;
+  background: transparent;
+  text-decoration: none;
+  color: var(--flew-color-text);
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.mobile-menu .nav-link:hover {
+  background-color: var(--flew-color-bg-hover);
+}
+
+.mobile-menu .nav-link.active {
+  background-color: var(--flew-color-bg-active);
+}
+
+.mobile-menu .nav-link:focus-visible {
+  outline: 2px solid var(--flew-color-primary);
+  outline-offset: -2px;
 }
 
 .mobile-user-info {
@@ -199,17 +218,17 @@
   }
 
   .app-header {
-    padding: var(--flew-spacing-4) !important;
+    padding: 12px 24px !important;
+    background: var(--flew-color-bg);
   }
 
   .logo {
-    font-size: var(--flew-font-size-xl) !important;
+    font-size: 16px !important;
   }
 
   .logo svg {
-    width: 24px;
-    height: 24px;
-    margin-right: 4px;
+    width: 20px;
+    height: 20px;
   }
 
   .theme-toggle svg {
@@ -241,22 +260,26 @@
   .burger-label {
     display: inline-flex;
   }
+
+  .app-header .theme-toggle {
+    display: none !important;
+  }
   
   .page {
-    padding: var(--flew-spacing-4);
+    padding: var(--flew-spacing-4) !important;
   }
 
   .stat-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, 1fr) !important;
   }
 
   .chart-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
   }
 }
 
 @media (max-width: 480px) {
   .stat-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
   }
 }
