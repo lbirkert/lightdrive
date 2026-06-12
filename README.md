@@ -1,34 +1,44 @@
-# LightDrive
+# ⚡ LightDrive
 
-Self-hosted cloud storage with file sharing, previews, and analytics.
+Self-hosted cloud storage with file sharing, previews, analytics, and a REST API.
 
 Built with [SvelteKit](https://kit.svelte.dev/), [Prisma](https://www.prisma.io/), and [FlewUI](https://github.com/lbirkert/FlewUi).
 
-## Quick Start (local dev)
+## Quick Install (Linux)
 
 ```bash
-chmod +x setup.sh
-./setup.sh
-bun run dev
+curl -fsSL https://raw.githubusercontent.com/lbirkert/lightdrive/main/setup.sh | bash
 ```
 
-## Raspberry Pi (production)
+Installs Node.js, clones the repo, builds the app, and registers a systemd service.  
+Works on Debian, Ubuntu, Fedora, Arch, openSUSE, and Raspberry Pi OS.  
+Run the same command again to update.
+
+## Local Development
 
 ```bash
-chmod +x setup-pi.sh
-./setup-pi.sh
+git clone https://github.com/lbirkert/lightdrive.git
+cd lightdrive
+cp .env.example .env
+npm install
+npm run dev
 ```
 
-The script installs Node.js, builds the app, and registers it as a systemd service running on port 3000.
+## Features
 
-## Manual Setup
+| | |
+|---|---|
+| 📁 **File management** | Folder tree, list/grid views, drag-and-drop uploads |
+| 🔗 **Share links** | Granular permissions (view, edit, insert, structure) |
+| 👥 **Collaboration** | Invite users to folders with role-based access |
+| 🖼️ **Previews** | Images, PDFs, documents (docx/md/txt/csv), audio/video |
+| 📊 **Analytics** | Storage usage, upload/download activity charts |
+| 🔒 **Security** | Argon2 hashing, HTTP-only session cookies |
+| 📡 **REST API** | Full API with Scalar documentation at `/api-docs` |
 
-```bash
-cp .env.example .env     # Configure DATABASE_URL etc.
-bun install
-bunx prisma db push      # Create database schema
-bun run dev
-```
+## Screenshots
+
+![LightDrive app](static/marketing/app_dark.png)
 
 ## Routes
 
@@ -39,6 +49,7 @@ bun run dev
 | `/drive/{shareToken}` | Shared drive (via share link) |
 | `/auth` | Sign in / Sign up |
 | `/account` | Account settings |
+| `/account/preferences` | Theme preferences |
 | `/account/shares` | Manage share links |
 | `/dashboard` | Usage analytics |
 | `/api-docs` | REST API reference |
@@ -48,12 +59,17 @@ bun run dev
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `DATABASE_URL` | `file:./dev.db` | SQLite database path |
+| `ORIGIN` | — | Public URL (required for production) |
+| `PORT` | `3000` | Server port |
+| `BODY_SIZE_LIMIT` | `52428800` | Max upload size (bytes) |
 
 ## Tech Stack
 
-- **Runtime:** Bun
+- **Runtime:** Node.js 24
 - **Framework:** SvelteKit (Svelte 5)
-- **Database:** SQLite via Prisma + libSQL
+- **Database:** SQLite via Prisma + libSQL (PostgreSQL optional)
 - **Auth:** Argon2 password hashing, HTTP-only session cookies
-- **UI:** FlewUI component library
+- **UI:** FlewUI design system
 - **Icons:** Lucide
+- **Previews:** Sharp (images), Mammoth (docx), Marked (markdown)
+- **Transcoding:** FFmpeg (audio/video)
