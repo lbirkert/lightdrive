@@ -19,6 +19,7 @@ model User {
   folders      Folder[]
   sessions     Session[]
   shares       Share[]
+  invitedShares Share[] @relation("InvitedUser")
   sentInvitations     ShareInvitation[] @relation("SentInvitations")
   receivedInvitations ShareInvitation[] @relation("ReceivedInvitations")
   involvements FileInvolvement[]
@@ -76,18 +77,20 @@ model FileInvolvement {
 }
 
 model Share {
-  id          String   @id @default(cuid())
-  fileId      String?
-  file        File?    @relation(fields: [fileId], references: [id], onDelete: Cascade)
-  folderId    String?
-  folder      Folder?  @relation(fields: [folderId], references: [id], onDelete: Cascade)
-  userId      String?
-  user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  token       String   @unique @default(cuid())
-  permissions String   @default("read")
-  expiresAt   DateTime?
-  createdAt   DateTime @default(now())
-  invitations ShareInvitation[]
+  id            String   @id @default(cuid())
+  fileId        String?
+  file          File?    @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  folderId      String?
+  folder        Folder?  @relation(fields: [folderId], references: [id], onDelete: Cascade)
+  userId        String?
+  user          User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  invitedUserId String?
+  invitedUser   User?    @relation("InvitedUser", fields: [invitedUserId], references: [id], onDelete: SetNull)
+  token         String   @unique @default(cuid())
+  permissions   String   @default("read")
+  expiresAt     DateTime?
+  createdAt     DateTime @default(now())
+  invitations   ShareInvitation[]
 }
 
 model ShareInvitation {

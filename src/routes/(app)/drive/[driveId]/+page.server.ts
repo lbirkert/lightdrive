@@ -1,6 +1,6 @@
 import { getRootFolders, getSubFolders, getFolder, getFiles, getFolderTreeSizes, getShare, getAcceptedDrives } from "$lib/server/db";
 import prisma from "$lib/server/prisma";
-import { error } from "@sveltejs/kit";
+import { error, redirect } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
 
 export const load: PageServerLoad = async ({ locals, depends, url, params }) => {
@@ -47,6 +47,16 @@ export const load: PageServerLoad = async ({ locals, depends, url, params }) => 
   const share = await getShare(driveId);
   if (!share) error(404, "Share link not found.");
   if (share.expiresAt && share.expiresAt < new Date()) error(410, "This share link has expired.");
+
+  if (share.invitedUserId) {
+    if (!locals.user) {
+      const redirectTo = `/auth?redirect=${encodeURIComponent(url.pathname)}`;
+      redirect(302, redirectTo);
+    }
+    if (locals.user.id !== share.invitedUserId) {
+      error(403, "This share link is restricted to a specific user.");
+    }
+  }
 
   if (share.fileId && share.file) {
     return {

@@ -462,6 +462,7 @@ export async function getShare(token: string) {
       file: true,
       folder: { include: { files: true, children: true } },
       user: { select: { id: true, name: true } },
+      invitedUser: { select: { id: true, name: true, email: true } },
     },
   });
 }
@@ -469,7 +470,7 @@ export async function getShare(token: string) {
 export async function getFileShares(fileId: string) {
   return prisma.share.findMany({
     where: { fileId },
-    include: { file: true },
+    include: { file: true, invitedUser: { select: { id: true, name: true, email: true } } },
     orderBy: { createdAt: "desc" },
   });
 }
@@ -477,7 +478,7 @@ export async function getFileShares(fileId: string) {
 export async function getFolderShares(folderId: string) {
   return prisma.share.findMany({
     where: { folderId },
-    include: { folder: true },
+    include: { folder: true, invitedUser: { select: { id: true, name: true, email: true } } },
     orderBy: { createdAt: "desc" },
   });
 }
@@ -491,7 +492,7 @@ export async function getUserShares(userId: string) {
         { userId },
       ],
     },
-    include: { file: true, folder: true, user: { select: { id: true, name: true } } },
+    include: { file: true, folder: true, user: { select: { id: true, name: true } }, invitedUser: { select: { id: true, name: true, email: true } } },
     orderBy: { createdAt: "desc" },
   });
 }
@@ -572,6 +573,7 @@ export async function acceptShareInvitation(id: string) {
       userId: invitation.fromUserId,
       folderId: invitation.folderId,
       permissions: invitation.permissions,
+      invitedUserId: invitation.toUserId,
     },
   });
 

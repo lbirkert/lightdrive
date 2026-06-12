@@ -149,6 +149,11 @@
             <span class="share-perms">{share.permissions}</span>
           </div>
           <div class="share-meta">
+            {#if share.invitedUser}
+              <span class="badge badge-restricted">Restricted to {share.invitedUser.email}</span>
+            {:else}
+              <span class="badge badge-public">Public link</span>
+            {/if}
             {#if share.expiresAt}
               <span class="tertiary">Expires {formatDate(share.expiresAt)}</span>
             {:else}

@@ -7,10 +7,9 @@
   import UploadFooter from "$lib/components/UploadFooter.svelte";
   import { uploadStore } from "$lib/components/upload-store.svelte";
   import Avatar from "$lib/components/Avatar.svelte";
-  import { getInitials } from "$lib/helpers";
 
   let { data, children }: { data: { user: App.Locals["user"] }; children: import("svelte").Snippet } = $props();
-  let user = $derived($page.data.user);
+  let user = $derived(data.user);
 
   let userMenuOpen = $state(false);
 
