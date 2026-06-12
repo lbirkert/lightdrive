@@ -14,6 +14,7 @@ model User {
   passwordHash String
   avatarUrl    String?
   avatarColor  String?
+  admin        Boolean   @default(false)
   createdAt    DateTime  @default(now())
   files        File[]
   folders      Folder[]

@@ -47,6 +47,7 @@ body {
 
 .mk-root-wrap.mk-marketing {
   min-height: 100dvh;
+  overflow-x: hidden;
 }
 
 .mk-root-content {
@@ -381,13 +382,9 @@ body {
   gap: var(--mk-spacing-3);
 }
 
-.mk-m-hide {
-  display: block;
-}
-
 @media (max-width: 768px) {
   .mk-m-hide {
-    display: none;
+    display: none !important;
   }
 }
 
@@ -463,5 +460,116 @@ body {
 
   .mk-features-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+.mk-burger-label {
+  display: none;
+  cursor: pointer;
+  align-items: center;
+  padding: 8px;
+  color: var(--mk-text-secondary);
+}
+
+.mk-burger-label:hover {
+  color: var(--mk-text);
+}
+
+.mk-mobile-menu-checkbox {
+  display: none;
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.mk-mobile-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  top: 66px;
+  flex-direction: column;
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+#mk-mobile-menu-toggle:checked ~ .mk-mobile-overlay {
+  display: flex;
+}
+
+.mk-mobile-overlay-close {
+  position: absolute;
+  inset: 0;
+  cursor: default;
+}
+
+.mk-mobile-menu {
+  position: relative;
+  z-index: 1;
+  height: 100vh;
+  padding: var(--flew-spacing-4);
+  overflow-y: auto;
+  background-color: var(--flew-color-bg);
+  border-radius: 0 0 var(--flew-radius-lg) var(--flew-radius-lg);
+  display: flex;
+  flex-direction: column;
+}
+
+.mk-mobile-menu ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--flew-spacing-4);
+}
+
+.mk-mobile-menu hr {
+  display: block;
+  margin: var(--flew-spacing-8) 0;
+}
+
+.mk-mobile-menu .nav-link {
+  display: flex;
+  align-items: center;
+  justify-content: start;
+  gap: var(--flew-spacing-3);
+  padding: 14px var(--flew-spacing-3);
+  border-radius: var(--flew-radius-md);
+  width: 100%;
+  font-size: var(--flew-font-size-lg);
+  transition: background-color 0.15s;
+  border: none;
+  background: transparent;
+  text-decoration: none;
+  color: var(--flew-color-text);
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.mk-mobile-menu .nav-link:hover {
+  background-color: var(--flew-color-bg-hover);
+}
+
+.mk-mobile-menu .nav-link.active {
+  background-color: var(--flew-color-bg-active);
+}
+
+.mk-mobile-menu .nav-link:focus-visible {
+  outline: 2px solid var(--flew-color-primary);
+  outline-offset: -2px;
+}
+
+.mk-mobile-menu button.nav-link {
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .mk-marketing-nav {
+    display: none !important;
+  }
+
+  .mk-burger-label {
+    display: inline-flex;
   }
 }

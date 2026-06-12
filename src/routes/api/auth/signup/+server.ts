@@ -3,6 +3,10 @@ import { createUser, getUserByEmail, createSession } from "$lib/server/db";
 import type { RequestHandler } from "./$types";
 
 export const POST: RequestHandler = async ({ request, cookies }) => {
+  if (process.env["DISABLE_SIGNUP"] === "true") {
+    return json({ error: "Signups are disabled" }, { status: 403 });
+  }
+
   const { name, email, password } = await request.json();
 
   if (!name || !email || !password) {

@@ -2,7 +2,7 @@
   import "$lib/styles/marketing.css";
   import { page } from "$app/stores";
   import { ModeWatcher, mode, setMode } from "mode-watcher";
-  import { Zap, Sun, Moon } from "@lucide/svelte";
+  import { Zap, Sun, Moon, Menu } from "@lucide/svelte";
 
   let { children }: { children: import("svelte").Snippet } = $props();
 
@@ -19,6 +19,7 @@
 <ModeWatcher />
 <div class="mk-root-wrap" class:mk-marketing={isMarketing}>
   {#if isMarketing}
+    <input type="checkbox" id="mk-mobile-menu-toggle" class="mk-mobile-menu-checkbox" />
     <header class="mk-marketing-header">
       <div class="mk-flex-row mk-gap-3 mk-align-center">
         <a href="/" class="mk-logo">
@@ -26,6 +27,9 @@
           <span class="mk-text-semibold">LightDrive</span>
         </a>
         <div class="mk-flex-1"></div>
+        <label class="mk-burger-label" for="mk-mobile-menu-toggle" aria-label="Menu">
+          <Menu size={22} />
+        </label>
         <nav class="mk-marketing-nav">
           <a href="/" class="mk-nav-link" class:mk-active={$page.url.pathname === "/"}>
             Home
@@ -46,6 +50,37 @@
         </nav>
       </div>
     </header>
+
+    <div class="mk-mobile-overlay">
+      <label class="mk-mobile-overlay-close" for="mk-mobile-menu-toggle"></label>
+      <nav class="mk-mobile-menu">
+        <ul>
+          <li>
+            <a href="/" class="nav-link" class:active={$page.url.pathname === "/"} onclick={() => { const cb = document.getElementById("mk-mobile-menu-toggle") as HTMLInputElement; if (cb) cb.checked = false; }}>
+              Home
+            </a>
+          </li>
+          <li>
+            <a href="/api-docs" class="nav-link" class:active={$page.url.pathname.startsWith("/api-docs")} onclick={() => { const cb = document.getElementById("mk-mobile-menu-toggle") as HTMLInputElement; if (cb) cb.checked = false; }}>
+              API Docs
+            </a>
+          </li>
+          <li>
+            <a href="/drive" class="nav-link" class:active={$page.url.pathname.startsWith("/drive")} onclick={() => { const cb = document.getElementById("mk-mobile-menu-toggle") as HTMLInputElement; if (cb) cb.checked = false; }}>
+              Go to App
+            </a>
+          </li>
+        </ul>
+        <hr />
+        <ul>
+          <li>
+            <button class="nav-link" onclick={() => { toggleTheme(); const cb = document.getElementById("mk-mobile-menu-toggle") as HTMLInputElement; if (cb) cb.checked = false; }}>
+              {#if isDark}<Sun size={18} /> Light Mode{:else}<Moon size={18} /> Dark Mode{/if}
+            </button>
+          </li>
+        </ul>
+      </nav>
+    </div>
   {/if}
   <div class="mk-root-content">
     {@render children()}

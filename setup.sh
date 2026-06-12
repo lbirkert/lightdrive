@@ -270,6 +270,18 @@ if ! grep -q "^BODY_SIZE_LIMIT" .env 2>/dev/null; then
   ok "BODY_SIZE_LIMIT set to 50 MB"
 fi
 
+echo ""
+info "=== Signups ==="
+if ! grep -q "^DISABLE_SIGNUP" .env 2>/dev/null; then
+  if confirm "Disable public signups?"; then
+    echo 'DISABLE_SIGNUP=true' >> .env
+    ok "Public signups disabled — create users via: npx tsx scripts/create-user.ts [name] [email] [password] [--admin]"
+  else
+    echo 'DISABLE_SIGNUP=false' >> .env
+    ok "Public signups enabled"
+  fi
+fi
+
 # ── npm Dependencies ─────────────────────────
 
 echo ""
@@ -397,6 +409,24 @@ elif command -v firewall-cmd &>/dev/null; then
   fi
 else
   info "No firewall tool detected — ensure port $PORT is reachable"
+fi
+
+# ── Admin User ───────────────────────────────
+
+if grep -q "^DISABLE_SIGNUP=true" .env 2>/dev/null; then
+  echo ""
+  if confirm "Create an admin user?"; then
+    echo ""
+    read -rp "Name:  " ADMIN_NAME
+    read -rp "Email: " ADMIN_EMAIL
+    read -rsp "Password: " ADMIN_PASSWORD
+    echo ""
+    if [[ -n "$ADMIN_NAME" && -n "$ADMIN_EMAIL" && -n "$ADMIN_PASSWORD" ]]; then
+      npx tsx scripts/create-user.ts "$ADMIN_NAME" "$ADMIN_EMAIL" "$ADMIN_PASSWORD" --admin
+    else
+      warn "Skipping — all fields required."
+    fi
+  fi
 fi
 
 # ── Done ─────────────────────────────────────
