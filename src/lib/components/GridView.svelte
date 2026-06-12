@@ -1,6 +1,6 @@
 <script lang="ts">
   import { formatSize, getPreviewUrl, isImageType, isVideoType } from "../helpers";
-  import { Folder, FileText } from "@lucide/svelte";
+  import { Folder, FileText, HardDrive } from "@lucide/svelte";
 
   let failedImages = $state<Set<string>>(new Set());
   function imgError(fileId: string) {
@@ -20,6 +20,7 @@
     onopenfilepreview?: (id: string) => void;
     ontoggleselection?: (id: string) => void;
     emptyMessage?: string;
+    useDriveIcon?: boolean;
   };
 
   let {
@@ -27,6 +28,7 @@
     selectedIds,
     onnavigate, onopenfilepreview, ontoggleselection,
     emptyMessage = "No files yet.",
+    useDriveIcon = false,
   }: Props = $props();
 
   let longPressTimer: ReturnType<typeof setTimeout> | null = null;
@@ -73,7 +75,7 @@
         tabindex={0}
         onkeydown={(e) => { if (e.key === "Enter") handleClick(e, f.id, true); }}
       >
-        <div class="grid-preview"><Folder size={24} /></div>
+        <div class="grid-preview">{#if useDriveIcon}<HardDrive size={24} />{:else}<Folder size={24} />{/if}</div>
         <div class="grid-info">
           <span class="grid-name">{f.name}</span>
           <span class="grid-size">{formatSize(folderSizes[f.id] ?? 0)}</span>

@@ -86,6 +86,17 @@
     padding-bottom: var(--flew-spacing-4) !important;
   }
 
+  .drive-dropdown-chevron svg,
+  .back-btn svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .drive-dropdown-chevron,
+  .back-btn {
+    margin-right: 4px;
+  }
+
   .toolbar .btn-ghost svg {
     width: 18px;
     height: 18px;
@@ -100,7 +111,16 @@
   }
 
   .logo svg {
-    width: 30px;
-    height: 30px;
+    width: 24px;
+    height: 24px;
+    margin-right: 4px;
+  }
+
+  .breadcrumb-desktop {
+    display: none !important;
+  }
+
+  .breadcrumb-mobile {
+    display: flex !important;
   }
 }

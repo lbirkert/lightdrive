@@ -5,7 +5,7 @@
     getPreviewUrl,
     isVideoType,
   } from "../helpers";
-  import { Folder, FileText } from "@lucide/svelte";
+  import { Folder, FileText, HardDrive } from "@lucide/svelte";
 
   let failedImages = $state<Set<string>>(new Set());
   function imgError(fileId: string) {
@@ -28,6 +28,7 @@
     onopenfilepreview?: (id: string) => void;
     ontoggleselection?: (id: string) => void;
     emptyMessage?: string;
+    useDriveIcon?: boolean;
   };
 
   let {
@@ -37,6 +38,7 @@
     folderSizes = {},
     selectedIds,
     sortMode = "date-desc",
+    useDriveIcon = false,
     updateSort,
     sortIndicator,
     onnavigate,
@@ -137,7 +139,7 @@
         }}
       >
         <span class="col-name">
-          <span class="list-thumb-placeholder"><Folder size={16} /></span>
+          <span class="list-thumb-placeholder">{#if useDriveIcon}<HardDrive size={16} />{:else}<Folder size={16} />{/if}</span>
           <div>
             <span class="name-text">{f.name}</span>
             <span class="name-size m-show">{formatSize(folderSizes[f.id] ?? 0)}</span>

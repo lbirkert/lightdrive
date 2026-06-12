@@ -1,7 +1,7 @@
 import { json, error } from "@sveltejs/kit";
 import { unlink } from "node:fs/promises";
 import { join } from "node:path";
-import { getFile, getFolder, deleteFileRecord, moveFile, renameFile, getDriveContext, isFileInSharedFolder, isFolderInSharedFolder } from "$lib/server/db";
+import { getFile, getFolder, deleteFileRecord, moveFile, moveFileToDrive, renameFile, getDriveContext, isFileInSharedFolder, isFolderInSharedFolder } from "$lib/server/db";
 import type { RequestHandler } from "./$types";
 
 const UPLOAD_DIR = join(process.cwd(), "uploads");
@@ -30,7 +30,23 @@ export const PATCH: RequestHandler = async ({ request, params, locals }) => {
     return json({ renamed: params.fileId, name: body.name });
   }
 
-  const { folderId } = body;
+  const { folderId, targetDriveId } = body;
+
+  if (targetDriveId && targetDriveId !== params.driveId) {
+    const targetCtx = await getDriveContext(targetDriveId, locals, "structure");
+    if (!targetCtx) return json({ error: "Target drive not found or insufficient permissions" }, { status: 404 });
+
+    if (folderId) {
+      const targetFolder = await getFolder(folderId);
+      if (!targetFolder || targetFolder.userId !== targetCtx.userId) {
+        return json({ error: "Target folder not found" }, { status: 404 });
+      }
+    }
+
+    await moveFileToDrive(params.fileId, folderId ?? null, targetCtx.userId);
+    return json({ moved: params.fileId, folderId: folderId ?? null, targetDriveId });
+  }
+
   if (ctx.type === "share" && ctx.share?.folderId) {
     const targetFolder = folderId || null;
     if (targetFolder && !(await isFolderInSharedFolder(targetFolder, ctx.share.folderId))) {

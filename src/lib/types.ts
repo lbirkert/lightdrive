@@ -56,6 +56,14 @@ export interface AcceptedDrive {
   token: string;
 }
 
+export interface DriveTarget {
+  id: string;
+  name: string;
+  isOwner: boolean;
+  token: string | null;
+  folders: { id: string; name: string; parentId: string | null }[];
+}
+
 export interface PageData {
   driveId: string;
   isShared: boolean;

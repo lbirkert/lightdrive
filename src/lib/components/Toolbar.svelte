@@ -1,6 +1,19 @@
 <script lang="ts">
-  import { Search, Plus, Upload, List, Grid3x3, Pen, Share2, ArrowRight, Trash2, X, ChevronDown, ChevronRight } from "@lucide/svelte";
-  import { goto } from "$app/navigation";
+  import {
+    Search,
+    Plus,
+    Upload,
+    List,
+    Grid3x3,
+    Pen,
+    Share2,
+    ArrowRight,
+    Trash2,
+    X,
+    HardDrive,
+    LucideArrowLeft,
+  } from "@lucide/svelte";
+  import { page } from "$app/state";
 
   type FilterOption = { value: string; label: string };
   type SortOption = { value: string; label: string };
@@ -35,20 +48,38 @@
     onsortchange?: (value: string) => void;
     filterOptions?: FilterOption[];
     sortOptions?: SortOption[];
-    acceptedDrives?: { id: string; name: string; token: string }[];
     driveId?: string;
   };
 
   let {
-    breadcrumbs, viewMode = "list", showViewToggle = true, showNewButton = true, showUploadButton = true,
-    onnavigate, onviewmodechange, onnewclick, onuploadclick,
-    hasSelection = false, selectedCount = 0,
-    canRenameSelection = false, canShareSelection = false, canMoveSelection = false, canDeleteSelection = false,
-    onRename, onShare, onMove, onDelete, onClearSelection,
-    searchQuery = $bindable(""), filterType = $bindable("all"), sortMode = $bindable("date-desc"),
+    breadcrumbs,
+    viewMode = "list",
+    showViewToggle = true,
+    showNewButton = true,
+    showUploadButton = true,
+    onnavigate,
+    onviewmodechange,
+    onnewclick,
+    onuploadclick,
+    hasSelection = false,
+    selectedCount = 0,
+    canRenameSelection = false,
+    canShareSelection = false,
+    canMoveSelection = false,
+    canDeleteSelection = false,
+    onRename,
+    onShare,
+    onMove,
+    onDelete,
+    onClearSelection,
+    searchQuery = $bindable(""),
+    filterType = $bindable("all"),
+    sortMode = $bindable("date-desc"),
     searchOpen = $bindable(false),
-    onsearchclear, onfilterchange, onsortchange,
-    acceptedDrives = [], driveId = "",
+    onsearchclear,
+    onfilterchange,
+    onsortchange,
+    driveId = "",
     filterOptions = [
       { value: "all", label: "All" },
       { value: "images", label: "Images" },
@@ -68,39 +99,13 @@
 
   let searchInputEl: HTMLInputElement | undefined = $state();
 
+  let isDriveSelectorPage = $derived(page.url.pathname === "/drive");
+
   $effect(() => {
     if (searchOpen && searchInputEl) {
       queueMicrotask(() => searchInputEl?.focus());
     }
   });
-
-  let driveDropdownOpen = $state(false);
-  let driveDropdownDesktop = $state<HTMLElement | undefined>(undefined);
-  let driveDropdownMobile = $state<HTMLElement | undefined>(undefined);
-
-  function navigateToDrive(token: string) {
-    driveDropdownOpen = false;
-    goto(`/drive/${token}`);
-  }
-
-  function toggleDriveDropdown(e: Event) {
-    e.stopPropagation();
-    if (driveDropdownOpen) {
-      driveDropdownOpen = false;
-    } else {
-      driveDropdownOpen = true;
-      queueMicrotask(() => {
-        const handler = (ev: MouseEvent) => {
-          const anyOpen = driveDropdownDesktop?.contains(ev.target as Node) || driveDropdownMobile?.contains(ev.target as Node);
-          if (!anyOpen) {
-            driveDropdownOpen = false;
-            document.removeEventListener("click", handler);
-          }
-        };
-        document.addEventListener("click", handler);
-      });
-    }
-  }
 </script>
 
 <div class="toolbar">
@@ -109,95 +114,107 @@
       <span class="selection-count">{selectedCount} selected</span>
       <span class="toolbar-spacer"></span>
       {#if canRenameSelection}
-        <button class="btn-ghost" onclick={onRename}><Pen size={14} /> <span class="m-hide">Rename</span></button>
+        <button class="btn-ghost" onclick={onRename}
+          ><Pen size={14} /> <span class="m-hide">Rename</span></button
+        >
       {/if}
       {#if canShareSelection}
-        <button class="btn-ghost" onclick={onShare}><Share2 size={14} /> <span class="m-hide">Share</span></button>
+        <button class="btn-ghost" onclick={onShare}
+          ><Share2 size={14} /> <span class="m-hide">Share</span></button
+        >
       {/if}
       {#if canMoveSelection}
-        <button class="btn-ghost" onclick={onMove}><ArrowRight size={14} /> <span class="m-hide">Move</span></button>
+        <button class="btn-ghost" onclick={onMove}
+          ><ArrowRight size={14} /> <span class="m-hide">Move</span></button
+        >
       {/if}
       {#if canDeleteSelection}
-        <button class="btn-ghost" onclick={onDelete}><Trash2 size={14} /> <span class="m-hide">Delete</span></button>
+        <button class="btn-ghost" onclick={onDelete}
+          ><Trash2 size={14} /> <span class="m-hide">Delete</span></button
+        >
       {/if}
-      <button class="btn-ghost" onclick={onClearSelection}><X size={14} /> <span class="m-hide">Cancel</span></button>
+      <button class="btn-ghost" onclick={onClearSelection}
+        ><X size={14} /> <span class="m-hide">Cancel</span></button
+      >
     {:else}
       <nav class="breadcrumb-desktop">
+        <a
+          href="/drive/"
+          class="drive-dropdown-chevron"
+          aria-label="Switch drive"
+        >
+          <HardDrive size={14} />
+        </a>
         {#each breadcrumbs as crumb, i}
           {#if i > 0}<span class="breadcrumb-sep">/</span>{/if}
-          {#if i === 0 && acceptedDrives.length > 0}
-            <!-- svelte-ignore a11y_click_events_have_key_events -->
-            <div class="drive-dropdown" bind:this={driveDropdownDesktop}>
-              <button class="drive-dropdown-chevron" onclick={toggleDriveDropdown} aria-label="Switch drive">
-                {#if driveDropdownOpen}
-                  <ChevronDown size={14} />
-                {:else}
-                  <ChevronRight size={14} />
-                {/if}
-              </button>
-              <a class="btn-ghost breadcrumb-btn" href="/drive/{driveId}" onclick={(e) => { e.preventDefault(); navigateToDrive(driveId); }}>
-                {crumb.name}
-              </a>
-              {#if driveDropdownOpen}
-                <div class="drive-dropdown-menu">
-                  <a class="drive-dropdown-item" href="/drive/" onclick={(e) => { e.preventDefault(); driveDropdownOpen = false; navigateToDrive(""); }}>
-                    My Drive
-                  </a>
-                  {#each acceptedDrives as drive}
-                    <a class="drive-dropdown-item" href="/drive/{drive.token}" onclick={(e) => { e.preventDefault(); navigateToDrive(drive.token); }}>
-                      {drive.name}
-                    </a>
-                  {/each}
-                </div>
-              {/if}
-            </div>
-          {:else}
-            <a class="btn-ghost truncate breadcrumb-btn" href="/drive/{crumb.id || ''}" onclick={(e) => { e.preventDefault(); onnavigate?.(crumb.id); }}>{crumb.name}</a>
-          {/if}
+          <a
+            class="btn-ghost truncate breadcrumb-btn"
+            href="/drive/{i === 0 ? driveId : crumb.id || ''}"
+            onclick={(e) => {
+              if (i > 0) {
+                e.preventDefault();
+                onnavigate?.(crumb.id);
+              }
+            }}>{crumb.name}</a
+          >
         {/each}
       </nav>
       <nav class="breadcrumb-mobile">
+        {#if breadcrumbs.length === 1 || isDriveSelectorPage}
+          <a
+            href="/drive/"
+            class="drive-dropdown-chevron"
+            aria-label="Switch drive"
+          >
+            <HardDrive size={14} />
+          </a>
+        {/if}
         {#if breadcrumbs.length > 1}
-          <a class="back-btn" href="/drive/{breadcrumbs[breadcrumbs.length - 2]?.id || ''}" onclick={(e) => { e.preventDefault(); onnavigate?.(breadcrumbs[breadcrumbs.length - 2]?.id); }} aria-label="Back">&larr;</a>
+          <a
+            class="back-btn"
+            href="/drive/{breadcrumbs[breadcrumbs.length - 2]?.id || ''}"
+            onclick={(e) => {
+              e.preventDefault();
+              onnavigate?.(breadcrumbs[breadcrumbs.length - 2]?.id);
+            }}
+            aria-label="Back">
+            <LucideArrowLeft/>
+            </a
+          >
         {/if}
-        {#if acceptedDrives.length > 0 && breadcrumbs.length === 1}
-          <div class="drive-dropdown" bind:this={driveDropdownMobile}>
-            <button class="drive-dropdown-chevron" onclick={toggleDriveDropdown} aria-label="Switch drive">
-              {#if driveDropdownOpen}
-                <ChevronDown size={14} />
-              {:else}
-                <ChevronRight size={14} />
-              {/if}
-            </button>
-            <span class="current-folder">{breadcrumbs[breadcrumbs.length - 1]?.name ?? ""}</span>
-            {#if driveDropdownOpen}
-              <div class="drive-dropdown-menu">
-                <a class="drive-dropdown-item" href="/drive/" onclick={(e) => { e.preventDefault(); driveDropdownOpen = false; navigateToDrive(""); }}>
-                  My Drive
-                </a>
-                {#each acceptedDrives as drive}
-                  <a class="drive-dropdown-item" href="/drive/{drive.token}" onclick={(e) => { e.preventDefault(); navigateToDrive(drive.token); }}>
-                    {drive.name}
-                  </a>
-                {/each}
-              </div>
-            {/if}
-          </div>
-        {:else}
-          <span class="current-folder">{breadcrumbs[breadcrumbs.length - 1]?.name ?? ""}</span>
-        {/if}
+        <span class="current-folder"
+          >{breadcrumbs[breadcrumbs.length - 1]?.name ?? ""}</span
+        >
       </nav>
-      <button class="btn-ghost" onclick={() => searchOpen = !searchOpen}><Search size={14} /> <span class="m-hide">Search</span></button>
+      <button class="btn-ghost" onclick={() => (searchOpen = !searchOpen)}
+        ><Search size={14} /> <span class="m-hide">Search</span></button
+      >
       {#if showNewButton}
-        <button class="btn-ghost" onclick={onnewclick}><Plus size={14} /> <span class="m-hide">New</span></button>
+        <button class="btn-ghost" onclick={onnewclick}
+          ><Plus size={14} /> <span class="m-hide">New</span></button
+        >
       {/if}
       {#if showUploadButton}
-        <button class="btn-ghost" onclick={onuploadclick}><Upload size={14} /> <span class="m-hide">Upload</span></button>
+        <button class="btn-ghost" onclick={onuploadclick}
+          ><Upload size={14} /> <span class="m-hide">Upload</span></button
+        >
       {/if}
       {#if showViewToggle}
         <div class="view-toggle">
-          <a class="btn-ghost view-btn" class:active={viewMode === "list"} href="#list" aria-label="List view"><List size={14} /> <span class="m-hide">List</span></a>
-          <a class="btn-ghost view-btn" class:active={viewMode === "grid"} href="#grid" aria-label="Grid view"><Grid3x3 size={14} /> <span class="m-hide">Grid</span></a>
+          <a
+            class="btn-ghost view-btn"
+            class:active={viewMode === "list"}
+            href="#list"
+            aria-label="List view"
+            ><List size={14} /> <span class="m-hide">List</span></a
+          >
+          <a
+            class="btn-ghost view-btn"
+            class:active={viewMode === "grid"}
+            href="#grid"
+            aria-label="Grid view"
+            ><Grid3x3 size={14} /> <span class="m-hide">Grid</span></a
+          >
         </div>
       {/if}
     {/if}
@@ -215,12 +232,23 @@
             bind:this={searchInputEl}
           />
           {#if searchQuery}
-            <button class="search-clear" onclick={onsearchclear} aria-label="Clear search">&times;</button>
+            <button
+              class="search-clear"
+              onclick={onsearchclear}
+              aria-label="Clear search">&times;</button
+            >
           {/if}
         </div>
-        <select class="sort-select" value={sortMode} onchange={(e) => onsortchange?.((e.target as HTMLSelectElement).value)}>
+        <select
+          class="sort-select"
+          value={sortMode}
+          onchange={(e) =>
+            onsortchange?.((e.target as HTMLSelectElement).value)}
+        >
           {#each sortOptions as opt}
-            <option value={opt.value} selected={sortMode === opt.value}>{opt.label}</option>
+            <option value={opt.value} selected={sortMode === opt.value}
+              >{opt.label}</option
+            >
           {/each}
         </select>
       </div>

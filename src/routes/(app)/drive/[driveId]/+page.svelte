@@ -26,6 +26,7 @@
   import ListView from "$lib/components/ListView.svelte";
   import GridView from "$lib/components/GridView.svelte";
   import ShareDialog from "$lib/components/ShareDialog.svelte";
+  import FolderTree from "$lib/components/FolderTree.svelte";
   import { DriveStore } from "$lib/components/drive-store.svelte.js";
   import { uploadStore } from "$lib/components/upload-store.svelte.js";
 
@@ -193,7 +194,6 @@
         onsearchclear={() => (store.searchQuery = "")}
         onfilterchange={(v) => (store.filterType = v)}
         onsortchange={(v) => (store.sortMode = v as any)}
-        acceptedDrives={store.acceptedDrives}
         driveId={store.driveId}
       />
     {/if}
@@ -429,7 +429,7 @@
   >
     <!-- svelte-ignore a11y_click_events_have_key_events a11y_interactive_supports_focus -->
     <div
-      class="modal"
+      class="modal modal--tree"
       onclick={(e) => e.stopPropagation()}
       role="dialog"
       tabindex="-1"
@@ -440,29 +440,19 @@
           : store.moveTargetNames}
       </h2>
       <p>Choose destination:</p>
-      <ul class="move-list">
-        <li>
-          <button
-            class="btn-ghost"
-            onclick={() => store.doMove(null)}
-            disabled={store.moveRunning}>My Drive (root)</button
-          >
-        </li>
-        {#each store.allFolders.filter((f) => f.id !== store.moveDir) as folder}
-          <li>
-            <button
-              class="btn-ghost"
-              onclick={() => store.doMove(folder.id)}
-              disabled={store.moveRunning}>{folder.name}</button
-            >
-          </li>
-        {/each}
-      </ul>
-      <button
-        class="btn-ghost"
-        onclick={() => (store.moveDialogOpen = false)}
-        disabled={store.moveRunning}>Cancel</button
-      >
+      <FolderTree
+        drives={store.moveDrives}
+        currentFolderId={store.moveDir}
+        currentDriveId={store.driveId}
+        onselect={(folderId, driveId) => store.doMove(folderId, driveId)}
+      />
+      <div class="modal-actions">
+        <button
+          class="btn-ghost"
+          onclick={() => (store.moveDialogOpen = false)}
+          disabled={store.moveRunning}>Cancel</button
+        >
+      </div>
     </div>
   </div>
 {/if}

@@ -1,5 +1,5 @@
 import { getFileIconClass } from "../helpers";
-import type { ViewMode, SortMode, NewItemType, UploadFileState, ShareDialogState, PageData } from "../types";
+import type { ViewMode, SortMode, NewItemType, UploadFileState, ShareDialogState, PageData, DriveTarget } from "../types";
 import {
   DRIVE_CHUNK_SIZE, formatSpeed, formatEta, getFileCategory,
   currentFolderId, hasPermission, createFolderSortFn, createFileSortFn,
@@ -67,6 +67,7 @@ export class DriveStore {
   moveTargetNames = $state<string>("");
   moveDir = $state<string | null>(null);
   allFolders = $state<{ id: string; name: string; parentId: string | null }[]>([]);
+  moveDrives = $state<DriveTarget[]>([]);
   moveRunning = $state(false);
 
   previewContent = $state<any>(null);
@@ -361,18 +362,18 @@ export class DriveStore {
     this.moveTargetNames = this.selectedItems.map((i: any) => i.name || i.originalName).join(", ");
     this.moveDir = this.currentFolderId();
     this.moveRunning = false;
-    const res = await fetch(`/api/drive/${this.driveId}/folders?all=true`);
-    if (res.ok) { const r = await res.json(); this.allFolders = r.folders; }
-    else this.allFolders = [];
+    const res = await fetch("/api/drive/move-targets");
+    if (res.ok) { const r = await res.json(); this.moveDrives = r.drives; }
+    else this.moveDrives = [];
     this.moveDialogOpen = true;
   };
 
-  doMove = async (folderId: string | null) => {
+  doMove = async (folderId: string | null, targetDriveId: string) => {
     this.moveRunning = true;
     for (const { id, isFolder } of this.moveTargets) {
       await fetch(`/api/drive/${this.driveId}/${isFolder ? "folders" : "files"}/${id}`, {
         method: "PATCH", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ folderId }),
+        body: JSON.stringify({ folderId, targetDriveId }),
       });
     }
     this.moveRunning = false; this.moveDialogOpen = false; this.clearSelection(); this.kit.invalidate("app:drive");

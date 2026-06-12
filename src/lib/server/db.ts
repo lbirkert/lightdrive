@@ -184,11 +184,13 @@ export async function getFolderTreeSizes(userId: string): Promise<Record<string,
   }
 
   const folderSet = new Set(folders.map(f => f.id));
-  function getDescendantIds(id: string): string[] {
+  function getDescendantIds(id: string, seen: Set<string> = new Set()): string[] {
+    if (seen.has(id)) return [];
+    seen.add(id);
     const ids: string[] = [id];
     const children = childMap.get(id) ?? [];
     for (const cid of children) {
-      ids.push(...getDescendantIds(cid));
+      ids.push(...getDescendantIds(cid, seen));
     }
     return ids;
   }
@@ -213,10 +215,24 @@ export async function moveFile(id: string, folderId: string | null) {
   });
 }
 
+export async function moveFileToDrive(id: string, folderId: string | null, targetUserId: string) {
+  await prisma.file.updateMany({
+    where: { id },
+    data: { userId: targetUserId, folderId },
+  });
+}
+
 export async function moveFolder(id: string, parentId: string | null) {
   await prisma.folder.updateMany({
     where: { id },
     data: { parentId },
+  });
+}
+
+export async function moveFolderToDrive(id: string, parentId: string | null, targetUserId: string) {
+  await prisma.folder.updateMany({
+    where: { id },
+    data: { userId: targetUserId, parentId },
   });
 }
 
@@ -573,6 +589,91 @@ export async function getAcceptedDrives(userId: string) {
     orderBy: { createdAt: "desc" },
   });
   return accepted;
+}
+
+export async function getMoveTargets(userId: string) {
+  const [ownFolders, accepted] = await Promise.all([
+    prisma.folder.findMany({
+      where: { userId },
+      orderBy: { name: "asc" },
+    }),
+    prisma.shareInvitation.findMany({
+      where: { toUserId: userId, status: "accepted" },
+      include: {
+        fromUser: { select: { id: true, name: true } },
+        share: { select: { token: true, folderId: true, userId: true } },
+      },
+    }),
+  ]);
+
+  const drives: {
+    id: string;
+    name: string;
+    isOwner: boolean;
+    token: string | null;
+    folders: { id: string; name: string; parentId: string | null }[];
+  }[] = [
+    {
+      id: userId,
+      name: "My Drive",
+      isOwner: true,
+      token: null,
+      folders: ownFolders.map(f => ({ id: f.id, name: f.name, parentId: f.parentId })),
+    },
+  ];
+
+  for (const inv of accepted) {
+    const share = inv.share;
+    if (!share) continue;
+    const ownerId = inv.fromUser.id;
+    const ownerName = inv.fromUser.name;
+
+    let folders: { id: string; name: string; parentId: string | null }[];
+    let rootFolder: { id: string; name: string; parentId: string | null } | null = null;
+
+    if (share.folderId) {
+      rootFolder = await prisma.folder.findUnique({ where: { id: share.folderId }, select: { id: true, name: true, parentId: true } });
+      if (!rootFolder) continue;
+      const allSubFolders = await prisma.folder.findMany({
+        where: { userId: ownerId },
+        orderBy: { name: "asc" },
+      });
+      const subFolderIds = new Set<string>();
+      function collectDescendants(pid: string, seen: Set<string> = new Set()) {
+        if (seen.has(pid)) return;
+        seen.add(pid);
+        for (const f of allSubFolders) {
+          if (f.parentId === pid) {
+            subFolderIds.add(f.id);
+            collectDescendants(f.id, seen);
+          }
+        }
+      }
+      collectDescendants(share.folderId);
+      subFolderIds.add(share.folderId);
+
+      folders = allSubFolders
+        .filter(f => subFolderIds.has(f.id))
+        .map(f => ({ id: f.id, name: f.name, parentId: f.parentId }));
+    } else {
+      folders = await prisma.folder.findMany({
+        where: { userId: ownerId },
+        orderBy: { name: "asc" },
+      }).then(fs => fs.map(f => ({ id: f.id, name: f.name, parentId: f.parentId })));
+    }
+
+    const driveName = share.folderId && rootFolder ? rootFolder.name : `${ownerName}'s Drive`;
+
+    drives.push({
+      id: share.token,
+      name: driveName,
+      isOwner: false,
+      token: share.token,
+      folders,
+    });
+  }
+
+  return drives;
 }
 
 export async function getUserAcceptedShares(userId: string) {

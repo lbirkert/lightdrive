@@ -3,7 +3,7 @@
   import { ModeWatcher } from "mode-watcher";
   import { page } from "$app/stores";
   import { goto } from "$app/navigation";
-  import { Folder, BarChart3, LogIn, LogOut, User, Settings, HardDrive, Menu, Share2 } from "@lucide/svelte";
+  import { Folder, BarChart3, LogIn, LogOut, User, Settings, HardDrive, Menu, Share2, Zap } from "@lucide/svelte";
   import UploadFooter from "$lib/components/UploadFooter.svelte";
   import { uploadStore } from "$lib/components/upload-store.svelte";
 
@@ -49,7 +49,7 @@
 <input type="checkbox" id="mobile-menu-toggle" class="mobile-menu-checkbox" />
 <div class="app-shell">
   <header class="app-header">
-    <a href="/drive" class="logo"><HardDrive size={18} /> LightDrive</a>
+    <a href="/drive" class="logo"><Zap size={14} /> LightDrive</a>
 
     <nav class="desktop-nav">
       <ul>

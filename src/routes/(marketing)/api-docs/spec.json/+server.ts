@@ -216,6 +216,29 @@ const spec = {
         },
       },
     },
+    "/api/drive/move-targets": {
+      get: {
+        tags: ["Drive"],
+        summary: "Get folder trees for all drives the user can move files to",
+        description: "Returns the user's own drive and all accepted shared drives, each with a flat list of folders (with parentId for tree building).",
+        responses: {
+          "200": {
+            description: "Move targets",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    drives: { type: "array", items: { $ref: "#/components/schemas/DriveTarget" } },
+                  },
+                },
+              },
+            },
+          },
+          "401": { description: "Not authenticated" },
+        },
+      },
+    },
     "/api/drive/{driveId}/files": {
       get: {
         tags: ["Drive"],
@@ -312,7 +335,7 @@ const spec = {
       },
       patch: {
         tags: ["Drive"],
-        summary: "Move a file within a drive (change parent folder)",
+        summary: "Move a file within or across drives",
         parameters: [
           { name: "driveId", in: "path", required: true, schema: { type: "string" } },
           { name: "fileId", in: "path", required: true, schema: { type: "string" } },
@@ -323,7 +346,10 @@ const spec = {
             "application/json": {
               schema: {
                 type: "object",
-                properties: { folderId: { type: "string", nullable: true, description: "New parent folder ID. null = move to root." } },
+                properties: {
+                  folderId: { type: "string", nullable: true, description: "New parent folder ID. null = move to root." },
+                  targetDriveId: { type: "string", description: "Target drive ID for cross-drive moves (user ID or share token). Omit for same-drive moves." },
+                },
               },
             },
           },
@@ -474,6 +500,30 @@ const spec = {
       },
     },
     "/api/drive/{driveId}/folders/{folderId}": {
+      patch: {
+        tags: ["Drive"],
+        summary: "Move or rename a folder within or across drives",
+        parameters: [
+          { name: "driveId", in: "path", required: true, schema: { type: "string" } },
+          { name: "folderId", in: "path", required: true, schema: { type: "string" } },
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  name: { type: "string", description: "New folder name (for rename). Mutually exclusive with folderId/targetDriveId." },
+                  folderId: { type: "string", nullable: true, description: "New parent folder ID. null = move to root." },
+                  targetDriveId: { type: "string", description: "Target drive ID for cross-drive moves. Omit for same-drive moves." },
+                },
+              },
+            },
+          },
+        },
+        responses: { "200": { description: "Folder moved/renamed" } },
+      },
       delete: {
         tags: ["Drive"],
         summary: "Delete a folder and all its contents recursively",
@@ -600,6 +650,27 @@ const spec = {
           storedName: { type: "string", description: "Server-generated stored name — must be sent back with subsequent chunks" },
         },
         description: "Returned for intermediate chunks (not the first or last) during a chunked upload",
+      },
+      DriveTarget: {
+        type: "object",
+        properties: {
+          id: { type: "string", description: "Drive ID (user ID for personal, share token for shared drives)" },
+          name: { type: "string", description: "Display name (e.g. 'My Drive' or 'Jane Doe's Drive')" },
+          isOwner: { type: "boolean", description: "Whether this is the user's own drive" },
+          token: { type: "string", nullable: true, description: "Share token (null for personal drive)" },
+          folders: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                id: { type: "string" },
+                name: { type: "string" },
+                parentId: { type: "string", nullable: true },
+              },
+            },
+            description: "Flat list of folders with parentId for building the tree client-side",
+          },
+        },
       },
     },
   },
