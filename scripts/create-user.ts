@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { PrismaClient } from "../src/lib/server/prisma-client/client";
 import { PrismaLibSql } from "@prisma/adapter-libsql";
 import { hash } from "argon2";
