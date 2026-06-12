@@ -131,7 +131,7 @@ export class DriveStore {
   rawFolders = $derived(this.isShared ? this.sharedFolders : this.data.folders ?? []);
   rawFiles = $derived(this.isShared ? this.sharedFiles : this.data.files ?? []);
   displayBreadcrumbs = $derived(this.isShared ? this.shareBreadcrumbs : this.data.breadcrumbs ?? []);
-  displayFolderSizes = $derived(!this.isShared ? this.data.folderSizes : undefined);
+  displayFolderSizes = $derived(this.data.folderSizes);
   acceptedDrives = $derived(this.data.acceptedDrives ?? []);
 
   filteredFolders = $derived.by(() => {

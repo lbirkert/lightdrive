@@ -249,6 +249,11 @@ info "=== Avatar Colors Migration ==="
 npx tsx scripts/migrate-avatar-colors.ts
 ok "Avatar colors migrated"
 
+# Compute folder sizes for existing folders
+info "=== Folder Sizes Migration ==="
+npx tsx scripts/migrate-folder-sizes.ts
+ok "Folder sizes migrated"
+
 # ── Build the Application ────────────────────
 
 echo ""

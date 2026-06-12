@@ -42,6 +42,7 @@ model Folder {
   children  Folder[] @relation("FolderRelation")
   files     File[]
   shares    Share[]
+  size      Int      @default(0)
   createdAt DateTime @default(now())
 }
 

@@ -147,9 +147,11 @@ export async function addFile(
   transcodedName?: string | null,
   contentHash?: string | null,
 ) {
-  return prisma.file.create({
+  const file = await prisma.file.create({
     data: { storedName, originalName, contentHash, size, type, userId, folderId: folderId ?? null, hasPreview, transcodedName: transcodedName ?? null },
   });
+  await adjustFolderSizes(folderId ?? null, size);
+  return file;
 }
 
 export async function addFileInvolvement(fileId: string, userId: string) {
@@ -184,47 +186,42 @@ export async function getAllFolders(userId: string) {
 }
 
 export async function getFolderTreeSizes(userId: string): Promise<Record<string, number>> {
-  const [folders, files] = await Promise.all([
-    prisma.folder.findMany({ where: { userId }, select: { id: true, parentId: true } }),
-    prisma.file.findMany({ where: { userId }, select: { folderId: true, size: true } }),
-  ]);
-
-  const childMap = new Map<string | null, string[]>();
-  for (const f of folders) {
-    const p = f.parentId ?? "";
-    if (!childMap.has(p)) childMap.set(p, []);
-    childMap.get(p)!.push(f.id);
-  }
-
-  const dirSizes = new Map<string, number>();
-  for (const f of files) {
-    const key = f.folderId ?? "";
-    dirSizes.set(key, (dirSizes.get(key) ?? 0) + f.size);
-  }
-
-  const folderSet = new Set(folders.map(f => f.id));
-  function getDescendantIds(id: string, seen: Set<string> = new Set()): string[] {
-    if (seen.has(id)) return [];
-    seen.add(id);
-    const ids: string[] = [id];
-    const children = childMap.get(id) ?? [];
-    for (const cid of children) {
-      ids.push(...getDescendantIds(cid, seen));
-    }
-    return ids;
-  }
-
+  const folders = await prisma.folder.findMany({
+    where: { userId },
+    select: { id: true, size: true },
+  });
   const result: Record<string, number> = {};
   for (const f of folders) {
-    const allIds = getDescendantIds(f.id);
-    let total = 0;
-    for (const id of allIds) {
-      total += dirSizes.get(id) ?? 0;
-    }
-    result[f.id] = total;
+    result[f.id] = f.size;
   }
-
   return result;
+}
+
+export async function getFolderAncestors(folderId: string): Promise<string[]> {
+  const ids: string[] = [];
+  let current = await prisma.folder.findUnique({
+    where: { id: folderId },
+    select: { id: true, parentId: true },
+  });
+  while (current) {
+    ids.push(current.id);
+    if (!current.parentId || current.parentId === current.id) break;
+    current = await prisma.folder.findUnique({
+      where: { id: current.parentId },
+      select: { id: true, parentId: true },
+    });
+  }
+  return ids;
+}
+
+export async function adjustFolderSizes(folderId: string | null, delta: number) {
+  if (!folderId || delta === 0) return;
+  const ancestors = await getFolderAncestors(folderId);
+  if (ancestors.length === 0) return;
+  await prisma.folder.updateMany({
+    where: { id: { in: ancestors } },
+    data: { size: { increment: delta } },
+  });
 }
 
 export async function moveFile(id: string, folderId: string | null) {

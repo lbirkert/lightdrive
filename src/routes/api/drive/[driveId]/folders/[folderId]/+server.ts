@@ -1,7 +1,8 @@
 import { json, error } from "@sveltejs/kit";
 import { unlink } from "node:fs/promises";
 import { join } from "node:path";
-import { getDriveContext, getFolder, deleteFolder, renameFolder, moveFolder, moveFolderToDrive, isFolderInSharedFolder } from "$lib/server/db";
+import { getDriveContext, getFolder, deleteFolder, renameFolder, moveFolder, moveFolderToDrive, isFolderInSharedFolder, getFolderAncestors } from "$lib/server/db";
+import prisma from "$lib/server/prisma";
 import type { RequestHandler } from "./$types";
 
 const UPLOAD_DIR = join(process.cwd(), "uploads");
@@ -41,11 +42,31 @@ export const PATCH: RequestHandler = async ({ request, params, locals }) => {
       }
     }
 
+    const fs = folder.size;
+    if (folder.parentId) {
+      const oldAncestors = await getFolderAncestors(folder.parentId);
+      if (oldAncestors.length > 0) {
+        await prisma.folder.updateMany({ where: { id: { in: oldAncestors } }, data: { size: { increment: -fs } } });
+      }
+    }
     await moveFolderToDrive(params.folderId, folderId ?? null, targetCtx.userId);
     return json({ moved: params.folderId, folderId: folderId ?? null, targetDriveId });
   }
 
+  const fs = folder.size;
+  if (folder.parentId) {
+    const oldAncestors = await getFolderAncestors(folder.parentId);
+    if (oldAncestors.length > 0) {
+      await prisma.folder.updateMany({ where: { id: { in: oldAncestors } }, data: { size: { increment: -fs } } });
+    }
+  }
   await moveFolder(params.folderId, folderId ?? null);
+  if (folderId) {
+    const newAncestors = await getFolderAncestors(folderId);
+    if (newAncestors.length > 0) {
+      await prisma.folder.updateMany({ where: { id: { in: newAncestors } }, data: { size: { increment: fs } } });
+    }
+  }
   return json({ moved: params.folderId, folderId: folderId ?? null });
 };
 
@@ -69,6 +90,13 @@ export const DELETE: RequestHandler = async ({ params, locals }) => {
   if (ctx.type === "share" && ctx.share?.folderId) {
     const allowed = await isFolderInSharedFolder(params.folderId, ctx.share.folderId);
     if (!allowed) error(403, "Folder is not in the shared drive");
+  }
+
+  if (folder.parentId) {
+    const ancestors = await getFolderAncestors(folder.parentId);
+    if (ancestors.length > 0) {
+      await prisma.folder.updateMany({ where: { id: { in: ancestors } }, data: { size: { increment: -folder.size } } });
+    }
   }
 
   const result = await deleteFolder(params.folderId);

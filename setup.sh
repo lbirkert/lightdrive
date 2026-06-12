@@ -80,6 +80,14 @@ else
   npx tsx scripts/migrate-avatar-colors.ts
 fi
 
+# 8. Compute folder sizes for existing folders
+echo "==> Migrating folder sizes..."
+if [ "$RUNTIME" = "bun" ]; then
+  bun run scripts/migrate-folder-sizes.ts
+else
+  npx tsx scripts/migrate-folder-sizes.ts
+fi
+
 echo ""
 echo "==> Setup complete!"
     echo "    Run: $RUNTIME run dev"

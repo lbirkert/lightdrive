@@ -28,7 +28,7 @@ export const load: PageServerLoad = async ({ locals, depends, url, params }) => 
       ? await getSubFolders(folderId)
       : await getRootFolders(user.id);
     const files = await getFiles(user.id, folderId);
-    const folderSizes = await getFolderTreeSizes(user.id);
+    const folderSizes = (await getFolderTreeSizes(user.id)) ?? {};
 
     const breadcrumbs: { id: string | null; name: string }[] = [{ id: null, name: "My Drive" }];
     if (folderId) {
@@ -81,6 +81,7 @@ export const load: PageServerLoad = async ({ locals, depends, url, params }) => 
 
     const folders = await getSubFolders(targetFolderId);
     const files = await getFiles(share.folder.userId, targetFolderId);
+    const folderSizes = (await getFolderTreeSizes(share.folder.userId)) ?? {};
 
     return {
       user, driveId, isShared: true,
@@ -93,6 +94,7 @@ export const load: PageServerLoad = async ({ locals, depends, url, params }) => 
       sharedFiles: files,
       sharedFolders: folders,
       shareBreadcrumbs: breadcrumbs,
+      folderSizes,
       acceptedDrives,
     };
   }
@@ -103,6 +105,7 @@ export const load: PageServerLoad = async ({ locals, depends, url, params }) => 
       ? await getSubFolders(folderId)
       : await getRootFolders(share.userId);
     const files = await getFiles(share.userId, folderId);
+    const folderSizes = (await getFolderTreeSizes(share.userId)) ?? {};
 
     const driveName = share.user?.name ? `${share.user.name}'s Drive` : "Drive";
     const breadcrumbs: { id: string | null; name: string }[] = [{ id: null, name: driveName }];
@@ -127,6 +130,7 @@ export const load: PageServerLoad = async ({ locals, depends, url, params }) => 
       sharedFiles: files,
       sharedFolders: folders,
       shareBreadcrumbs: breadcrumbs,
+      folderSizes,
       acceptedDrives,
     };
   }

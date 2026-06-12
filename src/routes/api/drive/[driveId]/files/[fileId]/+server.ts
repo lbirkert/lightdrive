@@ -1,7 +1,7 @@
 import { json, error } from "@sveltejs/kit";
 import { unlink } from "node:fs/promises";
 import { join } from "node:path";
-import { getFile, getFolder, deleteFileRecord, moveFile, moveFileToDrive, renameFile, getDriveContext, isFileInSharedFolder, isFolderInSharedFolder } from "$lib/server/db";
+import { getFile, getFolder, deleteFileRecord, moveFile, moveFileToDrive, renameFile, getDriveContext, isFileInSharedFolder, isFolderInSharedFolder, adjustFolderSizes, getFolderAncestors } from "$lib/server/db";
 import type { RequestHandler } from "./$types";
 
 const UPLOAD_DIR = join(process.cwd(), "uploads");
@@ -43,7 +43,9 @@ export const PATCH: RequestHandler = async ({ request, params, locals }) => {
       }
     }
 
+    const oldFolderId = file.folderId;
     await moveFileToDrive(params.fileId, folderId ?? null, targetCtx.userId);
+    await adjustFolderSizes(oldFolderId, -file.size);
     return json({ moved: params.fileId, folderId: folderId ?? null, targetDriveId });
   }
 
@@ -61,7 +63,10 @@ export const PATCH: RequestHandler = async ({ request, params, locals }) => {
     }
   }
 
+  const oldFolderId = file.folderId;
   await moveFile(params.fileId, folderId ?? null);
+  await adjustFolderSizes(oldFolderId, -file.size);
+  await adjustFolderSizes(folderId, file.size);
   return json({ moved: params.fileId, folderId: folderId ?? null });
 };
 
@@ -88,6 +93,7 @@ export const DELETE: RequestHandler = async ({ params, locals }) => {
     return json({ error: "File not found" }, { status: 404 });
   }
 
+  await adjustFolderSizes(file.folderId, -file.size);
   await deleteFileRecord(params.fileId);
   try { await unlink(join(UPLOAD_DIR, file.storedName)); } catch {}
 

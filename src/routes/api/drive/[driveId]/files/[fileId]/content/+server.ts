@@ -1,7 +1,7 @@
 import { json, error } from "@sveltejs/kit";
 import { readFile, writeFile, stat } from "node:fs/promises";
 import { join } from "node:path";
-import { getFile, updateFileSize, addFileInvolvement, getDriveContext, isFileInSharedFolder } from "$lib/server/db";
+import { getFile, updateFileSize, addFileInvolvement, getDriveContext, isFileInSharedFolder, adjustFolderSizes } from "$lib/server/db";
 import { getDocumentCategory } from "$lib/server/preview";
 import type { RequestHandler } from "./$types";
 
@@ -101,6 +101,7 @@ export const PUT: RequestHandler = async ({ params, request, locals }) => {
     await writeFile(filePath, content, "utf-8");
     const { size } = await stat(filePath);
     await updateFileSize(file.id, size);
+    await adjustFolderSizes(file.folderId, size - file.size);
     addFileInvolvement(file.id, effectiveUserId);
     return json({ saved: true });
   }
@@ -118,6 +119,7 @@ export const PUT: RequestHandler = async ({ params, request, locals }) => {
       await writeFile(filePath, buf);
       const { size } = await stat(filePath);
       await updateFileSize(file.id, size);
+      await adjustFolderSizes(file.folderId, size - file.size);
       addFileInvolvement(file.id, effectiveUserId);
       return json({ saved: true });
     } catch (e: any) {
