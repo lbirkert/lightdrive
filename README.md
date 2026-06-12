@@ -69,7 +69,6 @@ npm run dev
 - **Framework:** SvelteKit (Svelte 5)
 - **Database:** SQLite via Prisma + libSQL (PostgreSQL optional)
 - **Auth:** Argon2 password hashing, HTTP-only session cookies
-- **UI:** FlewUI design system
 - **Icons:** Lucide
 - **Previews:** Sharp (images), Mammoth (docx), Marked (markdown)
 - **Transcoding:** FFmpeg (audio/video)
