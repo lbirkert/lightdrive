@@ -1390,6 +1390,41 @@
   background-color: color-mix(in srgb, var(--flew-color-warning) 15%, transparent);
 }
 
+.badge-pending {
+  color: var(--flew-color-info);
+  background-color: color-mix(in srgb, var(--flew-color-info) 15%, transparent);
+}
+
+.badge-accepted {
+  color: var(--flew-color-success);
+  background-color: color-mix(in srgb, var(--flew-color-success) 15%, transparent);
+}
+
+.badge-declined {
+  color: var(--flew-color-text-secondary);
+  background-color: var(--flew-color-bg-hover);
+}
+
+.badge-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  font-size: var(--flew-font-size-xs);
+  font-weight: 600;
+  color: #fff;
+  background-color: var(--flew-color-primary);
+  border-radius: var(--flew-radius-full);
+  margin-left: var(--flew-spacing-1);
+}
+
+.share-name-secondary {
+  font-size: var(--flew-font-size-xs);
+  color: var(--flew-color-text-secondary);
+}
+
 .share-actions {
   display: flex;
   gap: var(--flew-spacing-1);
@@ -1647,4 +1682,14 @@
   color: var(--flew-color-text-secondary);
   min-width: 36px;
   text-align: right;
+}
+
+.sharing-requests .tabs {
+  margin-bottom: 0;
+}
+
+.sharing-requests {
+  display: flex;
+  flex-direction: column;
+  gap: var(--flew-spacing-2);
 }

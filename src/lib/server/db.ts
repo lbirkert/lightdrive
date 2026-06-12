@@ -512,7 +512,7 @@ export async function updateShare(id: string, data: { permissions?: string; expi
   return prisma.share.update({
     where: { id },
     data,
-    include: { file: true, folder: true },
+    include: { file: true, folder: true, user: { select: { id: true, name: true } }, invitedUser: { select: { id: true, name: true, email: true } } },
   });
 }
 
@@ -552,7 +552,7 @@ export async function getShareInvitationsForUser(userId: string) {
 export async function getSentInvitations(userId: string) {
   return prisma.shareInvitation.findMany({
     where: { fromUserId: userId },
-    include: { toUser: { select: { id: true, name: true } }, share: true },
+    include: { toUser: { select: { id: true, name: true, email: true } }, share: true },
     orderBy: { createdAt: "desc" },
   });
 }

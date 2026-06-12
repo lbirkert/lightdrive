@@ -7,18 +7,21 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
 
   const invitation = await getShareInvitation(params.id);
   if (!invitation) return json({ error: "Invitation not found" }, { status: 404 });
-  if (invitation.toUserId !== locals.user.id) return json({ error: "Not your invitation" }, { status: 403 });
+  if (invitation.toUserId !== locals.user.id && invitation.fromUserId !== locals.user.id) {
+    return json({ error: "Not your invitation" }, { status: 403 });
+  }
   if (invitation.status !== "pending") return json({ error: "Invitation already responded" }, { status: 400 });
 
   const { action } = await request.json();
 
   if (action === "accept") {
+    if (invitation.toUserId !== locals.user.id) return json({ error: "Only the recipient can accept" }, { status: 403 });
     const result = await acceptShareInvitation(params.id);
     if (!result) return json({ error: "Failed to accept" }, { status: 500 });
     return json({ invitation: result.invitation, share: result.share });
   }
 
-  if (action === "decline") {
+  if (action === "decline" || action === "cancel") {
     const result = await declineShareInvitation(params.id);
     return json({ invitation: result });
   }

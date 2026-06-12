@@ -15,10 +15,10 @@ export const PATCH: RequestHandler = async ({ request, params, locals }) => {
   if (!folder || folder.userId !== ctx.userId) error(404, "Folder not found");
 
   if (ctx.type === "share") {
-    const perms = (ctx.share?.permissions || "").split(",").map(p => p.trim());
+    const perms = (ctx.share!.permissions || "").split(",").map(p => p.trim());
     if (!perms.includes("structure")) error(403, "Structure permission not granted");
-    if (ctx.share?.fileId) error(400, "Can only rename folders in shared drives");
-    const allowed = await isFolderInSharedFolder(params.folderId, ctx.share.folderId);
+    if (ctx.share!.fileId) error(400, "Can only rename folders in shared drives");
+    const allowed = await isFolderInSharedFolder(params.folderId, ctx.share!.folderId);
     if (!allowed) error(403, "Folder is not in the shared drive");
   }
 
@@ -75,10 +75,12 @@ export const DELETE: RequestHandler = async ({ params, locals }) => {
   if (!ctx) return json({ error: "Drive not found" }, { status: 404 });
 
   if (ctx.type === "share") {
-    const perms = (ctx.share?.permissions || "").split(",").map(p => p.trim());
+    const perms = (ctx.share!.permissions || "").split(",").map(p => p.trim());
     if (!perms.includes("structure")) error(403, "Structure permission not granted");
-    if (ctx.share?.fileId) error(400, "Can only delete folders in shared drives");
-    if (params.folderId === ctx.share.folderId) error(403, "Cannot delete the shared root folder");
+    if (ctx.share!.fileId) error(400, "Can only rename folders in shared drives");
+    if (params.folderId === ctx.share!.folderId) error(403, "Cannot delete the shared root folder");
+    const allowed = await isFolderInSharedFolder(params.folderId, ctx.share!.folderId);
+    if (!allowed) error(403, "Folder is not in the shared drive");
   }
 
   const folder = await getFolder(params.folderId);
