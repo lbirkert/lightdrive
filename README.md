@@ -2,7 +2,7 @@
 
 Self-hosted cloud storage with file sharing, previews, analytics, and a REST API.
 
-Built with [SvelteKit](https://kit.svelte.dev/), [Prisma](https://www.prisma.io/), and [FlewUI](https://github.com/lbirkert/FlewUi).
+Built with [SvelteKit](https://kit.svelte.dev/), [Prisma](https://www.prisma.io/).
 
 ## Quick Install (Linux)
 
