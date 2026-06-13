@@ -1,6 +1,6 @@
 import { json } from "@sveltejs/kit";
-import { writeFile, mkdir, unlink } from "node:fs/promises";
-import { join, extname } from "node:path";
+import { mkdir, unlink } from "node:fs/promises";
+import { join } from "node:path";
 import { randomBytes } from "node:crypto";
 import { prisma } from "$lib/server/db";
 import { AVATAR_COLORS } from "$lib/avatar";
@@ -28,14 +28,24 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
   await mkdir(AVATAR_DIR, { recursive: true });
 
-  const ext = extname(file.name) || ".png";
-  const filename = `${randomBytes(16).toString("hex")}${ext}`;
+  const baseName = randomBytes(16).toString("hex");
   const buffer = Buffer.from(await file.arrayBuffer());
-  await writeFile(join(AVATAR_DIR, filename), buffer);
+
+  const sharp = (await import("sharp")).default;
+  await Promise.all([
+    sharp(buffer)
+      .resize(64, 64, { fit: "cover" })
+      .webp({ quality: 85 })
+      .toFile(join(AVATAR_DIR, `${baseName}.webp`)),
+    sharp(buffer)
+      .resize(1024, 1024, { fit: "cover", withoutEnlargement: true })
+      .webp({ quality: 85 })
+      .toFile(join(AVATAR_DIR, `${baseName}@1024.webp`)),
+  ]);
 
   const oldUser = await prisma.user.findUnique({ where: { id: locals.user.id }, select: { avatarUrl: true } });
   const oldPath = oldUser?.avatarUrl;
-  const avatarUrl = `/api/auth/avatar/${filename}`;
+  const avatarUrl = `/api/auth/avatar/${baseName}.webp`;
 
   await prisma.user.update({
     where: { id: locals.user.id },
@@ -45,6 +55,8 @@ export const POST: RequestHandler = async ({ request, locals }) => {
   if (oldPath && oldPath.startsWith("/api/auth/avatar/")) {
     const oldFilename = oldPath.replace("/api/auth/avatar/", "");
     unlink(join(AVATAR_DIR, oldFilename)).catch(() => {});
+    const oldBase = oldFilename.replace(/\.[^.]+$/, "");
+    unlink(join(AVATAR_DIR, `${oldBase}@1024.webp`)).catch(() => {});
   }
 
   return json({ avatarUrl });

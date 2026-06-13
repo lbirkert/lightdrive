@@ -61,7 +61,10 @@ async function main() {
   });
   const knownAvatars = new Set<string>();
   for (const u of usersWithAvatars) {
-    if (u.avatarUrl) knownAvatars.add(u.avatarUrl);
+    if (u.avatarUrl) {
+      const filename = u.avatarUrl.replace("/api/auth/avatar/", "");
+      knownAvatars.add(filename);
+    }
   }
   console.log(`Found ${knownAvatars.size} avatar references in database\n`);
 
@@ -143,7 +146,11 @@ async function main() {
     entries = [];
   }
   for (const entry of entries) {
-    await removeIfOrphan(avatarDir, entry, knownAvatars, (name) => name, avatarStats);
+    await removeIfOrphan(avatarDir, entry, knownAvatars, (name) => {
+      // Normalize size variants ("abc@1024.webp" -> "abc.webp") to match the base URL stored in DB
+      const normalized = name.replace(/@\d+\.webp$/, ".webp");
+      return normalized;
+    }, avatarStats);
   }
   console.log(`  Done: ${avatarStats.removed} removed, ${avatarStats.skipped} kept, ${avatarStats.errors} errors\n`);
 

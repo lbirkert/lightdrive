@@ -12,11 +12,19 @@
 
   let imgError = $state(false);
   $effect(() => { imgError = false; });
+
+  function avatarSrc(): string | undefined {
+    if (!url) return undefined;
+    if (size === "lg" && url.endsWith(".webp")) {
+      return url.replace(".webp", "@1024.webp");
+    }
+    return url;
+  }
 </script>
 
 {#if url && !imgError}
   <img
-    src={url}
+    src={avatarSrc()}
     alt={name}
     class="avatar avatar:{size}"
     onerror={() => imgError = true}

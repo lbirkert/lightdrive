@@ -324,6 +324,10 @@ info "=== Folder Sizes Migration ==="
 npx tsx scripts/migrate-folder-sizes.ts 2>/dev/null || true
 ok "Folder sizes migrated"
 
+info "=== Avatar WebP Migration ==="
+npx tsx scripts/migrate-avatars.ts 2>/dev/null || true
+ok "Avatar WebP migration complete"
+
 # ── Build ────────────────────────────────────
 
 echo ""
