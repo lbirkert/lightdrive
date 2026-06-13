@@ -131,6 +131,69 @@ const spec = {
         },
       },
     },
+    "/api/auth/avatar": {
+      post: {
+        tags: ["Auth"],
+        summary: "Upload a profile avatar image",
+        description: "Uploads an image file (max 2MB) to set as the user's avatar. Replaces any existing avatar and deletes the old file.",
+        requestBody: {
+          required: true,
+          content: {
+            "multipart/form-data": {
+              schema: {
+                type: "object",
+                required: ["avatar"],
+                properties: {
+                  avatar: { type: "string", format: "binary", description: "Image file (max 2MB, must be an image type)" },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          "200": { description: "Avatar uploaded", content: { "application/json": { schema: { type: "object", properties: { avatarUrl: { type: "string", description: "URL of the uploaded avatar image" } } } } } },
+          "400": { description: "No file provided, file too large (>2MB), or not an image" },
+          "401": { description: "Not authenticated" },
+        },
+      },
+      patch: {
+        tags: ["Auth"],
+        summary: "Set avatar color (no image)",
+        description: "Sets a solid-color avatar using one of the predefined avatar colors. Clears any uploaded avatar image.",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                required: ["color"],
+                properties: {
+                  color: { type: "string", description: "Hex color from the predefined avatar color palette" },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          "200": { description: "Avatar color set", content: { "application/json": { schema: { type: "object", properties: { avatarColor: { type: "string" }, avatarUrl: { type: "string", nullable: true } } } } } },
+          "400": { description: "Invalid color" },
+          "401": { description: "Not authenticated" },
+        },
+      },
+    },
+    "/api/auth/avatar/{file}": {
+      get: {
+        tags: ["Auth"],
+        summary: "Serve an uploaded avatar image",
+        parameters: [
+          { name: "file", in: "path", required: true, schema: { type: "string" }, description: "Avatar filename (hex-encoded with extension)" },
+        ],
+        responses: {
+          "200": { description: "Avatar image binary with appropriate Content-Type. Cached for 1 year." },
+          "404": { description: "Avatar not found" },
+        },
+      },
+    },
     "/api/shares": {
       post: {
         tags: ["Shares"],
