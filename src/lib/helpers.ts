@@ -40,9 +40,12 @@ export function isVideoType(type: string, originalName: string): boolean {
   return ext ? VIDEO_EXTS.has(ext) : false;
 }
 
-export function getPreviewUrl(fileId: string, driveId?: string) {
-  if (driveId) return `/api/drive/${driveId}/files/${fileId}/preview`;
-  return `/api/files/${fileId}/preview`;
+export function getPreviewUrl(fileId: string, driveId?: string, size?: "sm") {
+  const base = driveId
+    ? `/api/drive/${driveId}/files/${fileId}/preview`
+    : `/api/files/${fileId}/preview`;
+  if (size) return `${base}?size=${size}`;
+  return base;
 }
 
 export function getInitials(name: string) {

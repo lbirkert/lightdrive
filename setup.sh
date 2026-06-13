@@ -328,6 +328,10 @@ info "=== Avatar WebP Migration ==="
 npx tsx scripts/migrate-avatars.ts 2>/dev/null || true
 ok "Avatar WebP migration complete"
 
+info "=== Preview Small Variant Migration ==="
+npx tsx scripts/migrate-previews.ts 2>/dev/null || true
+ok "Preview small variant migration complete"
+
 # ── Build ────────────────────────────────────
 
 echo ""

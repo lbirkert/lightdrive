@@ -178,7 +178,7 @@
         <span class="col-name">
           {#if f.hasPreview || (isVideoType(f.type, f.originalName) && !failedImages.has(f.id))}
             <LazyPreview
-              src={getPreviewUrl(f.id, driveId)}
+              src={getPreviewUrl(f.id, driveId, "sm")}
               alt=""
               class="list-thumb"
               onerror={() => imgError(f.id)}
