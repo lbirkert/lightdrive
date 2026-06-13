@@ -7,6 +7,7 @@
   } from "../helpers";
   import { Folder, FileText, HardDrive } from "@lucide/svelte";
   import Avatar from "./Avatar.svelte";
+  import LazyPreview from "./LazyPreview.svelte";
 
   let failedImages = $state<Set<string>>(new Set());
   function imgError(fileId: string) {
@@ -176,7 +177,7 @@
       >
         <span class="col-name">
           {#if f.hasPreview || (isVideoType(f.type, f.originalName) && !failedImages.has(f.id))}
-            <img
+            <LazyPreview
               src={getPreviewUrl(f.id, driveId)}
               alt=""
               class="list-thumb"

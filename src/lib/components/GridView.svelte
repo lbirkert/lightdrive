@@ -1,6 +1,7 @@
 <script lang="ts">
   import { formatSize, getPreviewUrl, isImageType, isVideoType } from "../helpers";
   import { Folder, FileText, HardDrive } from "@lucide/svelte";
+  import LazyPreview from "./LazyPreview.svelte";
 
   let failedImages = $state<Set<string>>(new Set());
   function imgError(fileId: string) {
@@ -97,9 +98,9 @@
       >
         <div class="grid-preview">
           {#if f.hasPreview || (isVideoType(f.type, f.originalName) && !failedImages.has(f.id))}
-            <img src={getPreviewUrl(f.id, driveId)} alt={f.originalName} class="grid-thumb" loading="lazy" onerror={() => imgError(f.id)} />
+            <LazyPreview src={getPreviewUrl(f.id, driveId)} alt={f.originalName} class="grid-thumb" onerror={() => imgError(f.id)} />
           {:else if isImageType(f.type)}
-            <img src="/api/drive/{driveId}/files/{f.id}/download" alt={f.originalName} class="grid-thumb" loading="lazy" />
+            <LazyPreview src="/api/drive/{driveId}/files/{f.id}/download" alt={f.originalName} class="grid-thumb" onerror={() => imgError(f.id)} />
           {:else}
             <FileText size={24} />
           {/if}
